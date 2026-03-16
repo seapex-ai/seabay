@@ -31,9 +31,14 @@ jobs:
           python -m twine check dist/*
 
       - name: Publish Python SDK
-        if: ${{ secrets.PYPI_API_TOKEN != '' }}
         working-directory: sdk-py
-        run: python -m twine upload --non-interactive dist/*
+        run: |
+          if [ -z "${TWINE_PASSWORD}" ]; then
+            echo "PYPI_API_TOKEN is not configured."
+            echo "Publishing is blocked until the token is added to GitHub Actions secrets."
+            exit 1
+          fi
+          python -m twine upload --non-interactive dist/*
 
       - name: Build CLI package
         working-directory: cli
@@ -43,16 +48,14 @@ jobs:
           python -m twine check dist/*
 
       - name: Publish CLI package
-        if: ${{ secrets.PYPI_API_TOKEN != '' }}
         working-directory: cli
-        run: python -m twine upload --non-interactive dist/*
-
-      - name: Fail clearly when PyPI token is missing
-        if: ${{ secrets.PYPI_API_TOKEN == '' }}
         run: |
-          echo "PYPI_API_TOKEN is not configured."
-          echo "Publishing is blocked until the token is added to GitHub Actions secrets."
-          exit 1
+          if [ -z "${TWINE_PASSWORD}" ]; then
+            echo "PYPI_API_TOKEN is not configured."
+            echo "Publishing is blocked until the token is added to GitHub Actions secrets."
+            exit 1
+          fi
+          python -m twine upload --non-interactive dist/*
 
   publish-npm:
     runs-on: ubuntu-latest
@@ -71,15 +74,13 @@ jobs:
         run: npm ci
 
       - name: Publish npm package
-        if: ${{ secrets.NPM_TOKEN != '' }}
         working-directory: sdk-js
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public
-
-      - name: Fail clearly when npm token is missing
-        if: ${{ secrets.NPM_TOKEN == '' }}
         run: |
-          echo "NPM_TOKEN is not configured."
-          echo "Publishing is blocked until the token is added to GitHub Actions secrets."
-          exit 1
+          if [ -z "${NODE_AUTH_TOKEN}" ]; then
+            echo "NPM_TOKEN is not configured."
+            echo "Publishing is blocked until the token is added to GitHub Actions secrets."
+            exit 1
+          fi
+          npm publish --access public
