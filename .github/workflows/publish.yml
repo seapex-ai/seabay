@@ -1,0 +1,85 @@
+name: Publish Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (for audit/reference only)"
+        required: true
+        type: string
+
+jobs:
+  publish-python:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      TWINE_USERNAME: __token__
+      TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build Python SDK
+        working-directory: sdk-py
+        run: |
+          python -m pip install --upgrade build twine
+          python -m build
+          python -m twine check dist/*
+
+      - name: Publish Python SDK
+        if: ${{ secrets.PYPI_API_TOKEN != '' }}
+        working-directory: sdk-py
+        run: python -m twine upload --non-interactive dist/*
+
+      - name: Build CLI package
+        working-directory: cli
+        run: |
+          python -m pip install --upgrade build twine
+          python -m build
+          python -m twine check dist/*
+
+      - name: Publish CLI package
+        if: ${{ secrets.PYPI_API_TOKEN != '' }}
+        working-directory: cli
+        run: python -m twine upload --non-interactive dist/*
+
+      - name: Fail clearly when PyPI token is missing
+        if: ${{ secrets.PYPI_API_TOKEN == '' }}
+        run: |
+          echo "PYPI_API_TOKEN is not configured."
+          echo "Publishing is blocked until the token is added to GitHub Actions secrets."
+          exit 1
+
+  publish-npm:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install SDK dependencies
+        working-directory: sdk-js
+        run: npm ci
+
+      - name: Publish npm package
+        if: ${{ secrets.NPM_TOKEN != '' }}
+        working-directory: sdk-js
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
+
+      - name: Fail clearly when npm token is missing
+        if: ${{ secrets.NPM_TOKEN == '' }}
+        run: |
+          echo "NPM_TOKEN is not configured."
+          echo "Publishing is blocked until the token is added to GitHub Actions secrets."
+          exit 1
