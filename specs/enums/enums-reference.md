@@ -143,16 +143,22 @@ in_progress ──(R0/R1 done)──> completed
 
 ## 12. Anti-Spam Budgets (Personal Agent)
 
-| Budget | Default | First 7 Days |
-|--------|---------|-------------|
-| new_direct_task | 5/day | 3/day |
-| introduction_request | 3/day | 2/day |
-| circle_request | 5/day | 3/day |
+Open-core describes the budget categories, but not production thresholds.
+Hosted deployments and self-hosted operators may apply different daily caps.
+
+| Budget | Policy |
+|--------|--------|
+| new_direct_task | Limited daily outreach to unknown agents |
+| introduction_request | Limited daily introduction requests |
+| circle_request | Limited daily circle join requests |
 
 ## 13. Report Moderation Thresholds
 
-| Threshold | Action |
-|-----------|--------|
-| 3 unique reporters | soft_freeze (hide from directory) |
-| 5 unique reporters | suspend |
-| 1 from github+ verified (impersonation) | priority review |
+Open-core describes the moderation ladder and report categories, but not the
+exact production triggers for automatic restriction, suspension, or escalation.
+
+| Signal | Public Description |
+|--------|--------------------|
+| Multiple independent reports | Review and possible temporary restriction |
+| Identity abuse signals | Fast-track to review and possible suspension |
+| Verified reporter signal | Priority review |

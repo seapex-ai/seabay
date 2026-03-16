@@ -56,6 +56,12 @@ done
 # Tests
 [ -d "${REPO_ROOT}/backend/tests" ] && cp -r "${REPO_ROOT}/backend/tests" "${OUTPUT}/backend/"
 rm -f "${OUTPUT}/backend/tests/test_admin.py"
+rm -f "${OUTPUT}/backend/tests/test_budget_rules.py"
+rm -f "${OUTPUT}/backend/tests/test_config.py"
+rm -f "${OUTPUT}/backend/tests/test_metrics.py"
+rm -f "${OUTPUT}/backend/tests/test_moderation.py"
+rm -f "${OUTPUT}/backend/tests/test_new_account.py"
+rm -f "${OUTPUT}/backend/tests/test_shadow_throttle.py"
 
 # ── Backend app root-level files ──
 mkdir -p "${OUTPUT}/backend/app"
@@ -152,6 +158,17 @@ for f in "${SERVICES_OPEN[@]}" "${SERVICES_REFERENCE[@]}"; do
     cp "${REPO_ROOT}/backend/app/services/${f}" "${OUTPUT}/backend/app/services/"
 done
 
+# ── Overlay public-safe templates for files that must not expose internal
+# operational thresholds or private enforcement details. ──
+TEMPLATE_ROOT="${REPO_ROOT}/scripts/opencore_templates"
+if [ -d "${TEMPLATE_ROOT}" ]; then
+  while IFS= read -r -d '' template; do
+    rel="${template#${TEMPLATE_ROOT}/}"
+    mkdir -p "$(dirname "${OUTPUT}/${rel}")"
+    cp "${template}" "${OUTPUT}/${rel}"
+  done < <(find "${TEMPLATE_ROOT}" -type f -print0)
+fi
+
 # ── Safety: ensure hosted/ NEVER leaks ──
 rm -rf "${OUTPUT}/backend/app/hosted"
 
@@ -189,5 +206,7 @@ echo "    Excluded from public repo:"
 echo "    - backend/app/hosted/          (production weights & thresholds)"
 echo "    - backend/app/api/v1/admin.py  (admin control panel)"
 echo "    - backend/app/schemas/admin.py (admin schemas)"
+echo "    - threshold-sensitive test fixtures"
+echo "    - public templates overlay internal enforcement defaults"
 echo ""
 echo "    Next: cd ${OUTPUT} && git init && git remote add origin git@github.com:seapex-ai/seabay.git"

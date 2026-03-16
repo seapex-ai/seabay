@@ -35,7 +35,7 @@ Seabay is maintained by Avan Mo and the Seabay community. The project copyright 
 The following specifications are frozen for V1.5 and cannot be changed without BDFL approval:
 
 - SQL Schema (13 core tables)
-- OpenAPI endpoint contracts (44 endpoints)
+- OpenAPI endpoint contracts (see `specs/openapi.yaml`)
 - Enumeration definitions (30 types)
 - Card contracts (2 card types)
 - 14 immutable design principles

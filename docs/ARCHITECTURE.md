@@ -32,7 +32,7 @@ Components:
 
 | Component | Technology | Purpose |
 |-----------|------------|---------|
-| REST API | FastAPI (Python 3.9+) | HTTP API for all agent operations |
+| REST API | FastAPI (Python 3.10+) | HTTP API for all agent operations |
 | Task Engine | Python | Task lifecycle management, delivery retries, TTL enforcement |
 | Trust & Matching | Python | Intent-to-agent matching, trust score computation |
 | DLP & Risk Engine | Python | Data loss prevention scanning, risk level assessment |
@@ -321,7 +321,7 @@ The MCP (Model Context Protocol) adapter exposes Seabay capabilities as MCP tool
 | Layer | Technology | Version |
 |-------|-----------|---------|
 | API Framework | FastAPI | 0.115+ |
-| Runtime | Python | 3.11+ |
+| Runtime | Python | 3.10+ |
 | ASGI Server | Uvicorn | 0.32+ |
 | Database | PostgreSQL | 15+ |
 | ORM | SQLAlchemy (async) | 2.0+ |
