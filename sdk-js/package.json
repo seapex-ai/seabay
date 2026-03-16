@@ -1,0 +1,25 @@
+{
+  "name": "@seabayai/sdk",
+  "version": "0.1.0",
+  "description": "JavaScript/TypeScript SDK for Seabay",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "Apache-2.0",
+  "author": "Avan Mo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seapex-ai/seabay"
+  },
+  "homepage": "https://seabay.ai",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  },
+  "files": [
+    "dist",
+    "src"
+  ]
+}

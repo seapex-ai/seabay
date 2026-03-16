@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Task Approval Card",
+  "description": "Seabay V1.5 Lite — Task Approval Card envelope schema",
+  "type": "object",
+  "required": ["card_type", "card_version", "card_id", "source", "created_at", "blocks", "actions", "fallback_text", "callback_base_url"],
+  "properties": {
+    "card_type": { "const": "task_approval" },
+    "card_version": { "type": "string", "pattern": "^\\d+\\.\\d+$" },
+    "card_id": { "type": "string", "pattern": "^crd_" },
+    "source": { "const": "seabay" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "locale": { "type": "string" },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["type", "text"],
+            "properties": {
+              "type": { "const": "header" },
+              "text": { "type": "string", "maxLength": 200 }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "risk_level", "message"],
+            "properties": {
+              "type": { "const": "risk_banner" },
+              "risk_level": { "enum": ["R2", "R3"] },
+              "message": { "type": "string", "maxLength": 500 }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "agent_id", "name"],
+            "properties": {
+              "type": { "const": "agent_summary" },
+              "agent_id": { "type": "string" },
+              "name": { "type": "string" },
+              "agent_type": { "type": "string" },
+              "verification_level": { "type": "string" },
+              "status": { "type": "string" }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "text"],
+            "properties": {
+              "type": { "const": "section" },
+              "text": { "type": "string", "maxLength": 1000 },
+              "fields": {
+                "type": "array",
+                "maxItems": 8,
+                "items": {
+                  "type": "object",
+                  "required": ["label", "value"],
+                  "properties": {
+                    "label": { "type": "string", "maxLength": 50 },
+                    "value": { "type": "string", "maxLength": 500 }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "badges"],
+            "properties": {
+              "type": { "const": "badge_row" },
+              "badges": {
+                "type": "array",
+                "maxItems": 5,
+                "items": {
+                  "type": "object",
+                  "required": ["type", "label"],
+                  "properties": {
+                    "type": { "enum": ["verification", "trust", "relationship", "status", "popularity"] },
+                    "label": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "text"],
+            "properties": {
+              "type": { "const": "context" },
+              "text": { "type": "string", "maxLength": 500 }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+              "type": { "const": "divider" }
+            }
+          }
+        ]
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["type", "label", "callback_method", "callback_path"],
+            "properties": {
+              "type": { "const": "callback_button" },
+              "label": { "type": "string" },
+              "style": { "enum": ["primary", "danger", "default"] },
+              "callback_method": { "type": "string" },
+              "callback_path": { "type": "string" },
+              "callback_body": { "type": "object" },
+              "confirm": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "text": { "type": "string" },
+                  "confirm_label": { "type": "string" },
+                  "cancel_label": { "type": "string" }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "label", "url"],
+            "properties": {
+              "type": { "const": "open_url" },
+              "label": { "type": "string" },
+              "url": { "type": "string", "format": "uri" },
+              "style": { "type": "string" }
+            }
+          }
+        ]
+      }
+    },
+    "fallback_text": { "type": "string", "maxLength": 2000 },
+    "callback_base_url": { "type": "string", "format": "uri" },
+    "auth_hint": { "type": "string" }
+  }
+}

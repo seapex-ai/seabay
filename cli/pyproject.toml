@@ -1,0 +1,26 @@
+[project]
+name = "seabay-cli"
+version = "0.1.0"
+description = "Seabay CLI — init, demo, doctor commands"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Avan Mo" }]
+keywords = ["ai", "agents", "seabay", "cli"]
+dependencies = [
+    "httpx>=0.28.0",
+    "click>=8.1.0",
+]
+
+[project.urls]
+Homepage = "https://seabay.ai"
+Repository = "https://github.com/seapex-ai/seabay"
+
+[project.scripts]
+seabay = "seabay.cli:cli"
+
+[tool.hatch.build.targets.wheel]
+packages = ["seabay"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

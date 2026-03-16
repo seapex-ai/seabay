@@ -1,0 +1,26 @@
+{
+  "name": "@seabay/widgets",
+  "version": "0.1.0",
+  "description": "Seabay V1.5 embeddable UI widgets — card rendering for task_approval and match_result",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "schemas"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "echo 'See backend/tests/test_cards.py for card contract tests'"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seapex-ai/seabay.git",
+    "directory": "widgets"
+  }
+}

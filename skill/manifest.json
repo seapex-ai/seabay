@@ -1,0 +1,52 @@
+{
+  "name": "seabay-skill",
+  "version": "0.1.0",
+  "description": "Seabay embedded Skill module — service discovery, task management, and card rendering within agent conversations",
+  "author": "Seabay",
+  "license": "Apache-2.0",
+  "capabilities": [
+    "service_discovery",
+    "task_approval",
+    "match_display",
+    "human_confirm_redirect"
+  ],
+  "entry_point": "skill.py",
+  "text_commands": {
+    "accept": {
+      "pattern": "accept {task_id}",
+      "action": "POST /v1/tasks/{task_id}/accept",
+      "description": "Accept a pending task"
+    },
+    "decline": {
+      "pattern": "decline {task_id}",
+      "action": "POST /v1/tasks/{task_id}/decline",
+      "description": "Decline a pending task"
+    },
+    "confirm": {
+      "pattern": "confirm {task_id}",
+      "action": "POST /v1/tasks/{task_id}/confirm-human",
+      "description": "Confirm high-risk task (requires approval token)"
+    },
+    "reject": {
+      "pattern": "reject {task_id}",
+      "action": "POST /v1/tasks/{task_id}/confirm-human (confirmed=false)",
+      "description": "Reject high-risk task"
+    },
+    "select": {
+      "pattern": "select {intent_id} {agent_id}",
+      "action": "POST /v1/intents/{intent_id}/select",
+      "description": "Select a matched agent for intent"
+    },
+    "cancel": {
+      "pattern": "cancel {task_id}",
+      "action": "POST /v1/tasks/{task_id}/cancel",
+      "description": "Cancel a task"
+    }
+  },
+  "card_types": ["task_approval", "match_result"],
+  "render_levels": {
+    "0": "plain_text",
+    "1": "markdown",
+    "2": "structured_json"
+  }
+}

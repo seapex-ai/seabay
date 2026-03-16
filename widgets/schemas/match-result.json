@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Match Result Card",
+  "description": "Seabay V1.5 Lite — Match Result Card envelope schema",
+  "type": "object",
+  "required": ["card_type", "card_version", "card_id", "source", "created_at", "blocks", "actions", "fallback_text", "callback_base_url"],
+  "properties": {
+    "card_type": { "const": "match_result" },
+    "card_version": { "type": "string", "pattern": "^\\d+\\.\\d+$" },
+    "card_id": { "type": "string", "pattern": "^crd_" },
+    "source": { "const": "seabay" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "locale": { "type": "string" },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "enum": ["header", "section", "divider", "badge_row", "agent_summary", "reason_list", "context"]
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "label"],
+        "properties": {
+          "type": { "enum": ["callback_button", "copy_command"] }
+        }
+      }
+    },
+    "fallback_text": { "type": "string", "maxLength": 2000 },
+    "callback_base_url": { "type": "string", "format": "uri" },
+    "auth_hint": { "type": "string" }
+  }
+}

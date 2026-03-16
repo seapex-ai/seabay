@@ -1,0 +1,156 @@
+# Seabay Open-Core Manifest
+# Defines which files belong to the public (open-core) repo vs private (hosted).
+# Used by scripts/export-opencore.sh to generate the public repository.
+#
+# PRINCIPLE: This manifest is the source of truth for the open-core boundary.
+# The export script (scripts/export-opencore.sh) enforces this manifest using
+# a strict whitelist approach — nothing is copied unless listed here.
+
+version: "2.0"
+boundary: "open-core"
+
+# ══════════════════════════════════════════════════════════════
+# Files/dirs included in the public repo (open-core)
+# ══════════════════════════════════════════════════════════════
+open_core:
+  # Root files
+  root:
+    - LICENSE
+    - NOTICE
+    - README.md
+    - README.zh-CN.md
+    - CHANGELOG.md
+    - ROADMAP.md
+    - docker-compose.yml
+    - docker-compose.prod.yml
+    - .gitignore
+    - .opencore-manifest.yml
+    - .github/
+
+  # Backend — selective whitelist
+  backend:
+    include:
+      - app/models/           # All data models (frozen contract)
+      - app/schemas/          # All Pydantic schemas (EXCEPT admin.py)
+      - app/core/             # security, id_generator, exceptions, middleware, rate_limiter
+      - app/database.py
+      - app/config.py
+      - app/main.py
+      - app/workers/          # Background workers
+      - app/api/__init__.py   # API package init
+      - app/api/deps.py       # API dependencies (auth, rate limiting)
+      - alembic/              # All migrations
+      - alembic.ini
+      - pyproject.toml
+      - Dockerfile
+      - entrypoint.sh
+      - .env.example
+      - tests/                # All tests
+
+    exclude:
+      - app/schemas/admin.py  # Admin schemas — MUST NOT be in public repo
+      - app/hosted/           # Production overrides — MUST NOT be in public repo
+
+    # Open-core services (full implementations, no hosted override exists)
+    services_open:
+      - agent_service.py
+      - relationship_service.py
+      - circle_service.py
+      - task_service.py
+      - verification_service.py
+      - introduction_service.py
+      - visibility_service.py
+      - contact_policy_service.py
+      - webhook_config_service.py
+      - webhook_service.py
+      - idempotency_service.py
+      - dlp_service.py
+      - notification_service.py
+      - passport_service.py
+
+    # Reference implementations that ship with open-core.
+    # These use default/reference weights. Production overrides with tuned
+    # weights live in app/hosted/services/ and are NEVER exported.
+    # Each file MUST contain a "Reference implementation" header comment.
+    services_reference:
+      - intent_service.py       # Reference matching (default weights)
+      - search_service.py       # Reference ranking (default weights)
+      - trust_service.py        # Reference trust scoring (default formula)
+      - metrics_service.py      # Reference analytics aggregation
+      - activity_service.py     # Reference activity tracking
+      - moderation_service.py   # Reference auto-moderation (default thresholds)
+      - report_service.py       # Reference abuse report processing
+      - shadow_throttle_service.py  # Reference anti-abuse delays
+      - budget_service.py       # Reference rate budgets
+      - new_account_service.py  # Reference new-account restrictions
+
+    # Open-core API endpoints (whitelisted)
+    api_open:
+      - health.py
+      - agents.py
+      - tasks.py
+      - relationships.py
+      - circles.py
+      - intents.py
+      - verifications.py
+      - public.py
+      - events.py
+      - reports.py
+
+  # SDKs, CLI, Adapters — all open
+  packages:
+    - sdk-py/
+    - sdk-js/
+    - cli/
+    - adapters/
+    - widgets/
+    - skill/
+    - specs/
+    - examples/
+    - helm-lite/
+    - reference-stack/
+
+  # Website and docs — all open
+  web:
+    - website/
+    - docs/
+    - scripts/
+
+# ══════════════════════════════════════════════════════════════
+# Files that MUST NOT be in the public repo (hosted intelligence)
+# ══════════════════════════════════════════════════════════════
+hosted_private:
+  directories:
+    - backend/app/hosted/     # Production service overrides, weights, thresholds
+
+  files:
+    - backend/app/api/v1/admin.py     # Admin/moderation control panel
+    - backend/app/schemas/admin.py    # Admin request/response schemas
+
+  production_services:
+    # These live in backend/app/hosted/services/ (NEVER in public repo).
+    # The open-core repo contains only the REFERENCE implementations
+    # (listed above in services_reference) with default weights.
+    - intent_service.py       # Production matching weights
+    - search_service.py       # Production ranking weights
+    - trust_service.py        # Production trust scoring
+    - metrics_service.py      # Production analytics aggregation
+    - activity_service.py     # Production activity analytics
+    - moderation_service.py   # Production auto-moderation rules
+    - report_service.py       # Production abuse report processing
+    - shadow_throttle_service.py  # Production anti-abuse delays
+    - budget_service.py       # Production rate budgets
+    - new_account_service.py  # Production new-account restrictions
+
+  notes: |
+    Services listed in production_services have TWO versions:
+    1. Reference implementation in app/services/ → ships with open-core (default weights)
+    2. Production implementation in app/hosted/services/ → private (tuned weights)
+
+    At runtime, the hosted deployment loads production overrides via SEABAY_HOSTED=true.
+    The reference-stack and self-hosted deployments use the open-core defaults.
+
+    The export script (scripts/export-opencore.sh) enforces this manifest:
+    - It uses a WHITELIST approach: only files listed above are copied
+    - It verifies admin.py and hosted/ are NEVER in the output
+    - It aborts with an error if any private file leaks
