@@ -1,8 +1,10 @@
 """Activity service — profile views, search appearances, activity feed.
 
+Open-Core: Reference implementation for activity tracking and feed generation.
+Production deployments may override storage and aggregation via app.hosted.
+
 Tracks agent activity for popularity metrics and activity feed display.
 Uses in-memory counters (V1.5) with periodic DB flush.
-In production, this would use Redis counters.
 """
 
 from __future__ import annotations

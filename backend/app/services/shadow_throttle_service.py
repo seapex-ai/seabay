@@ -1,8 +1,7 @@
 """Shadow throttle service — anti-abuse delivery delay (spec §15).
 
-HOSTED INTELLIGENCE: This service contains anti-abuse delay parameters.
-The production version with tuned parameters is in app/hosted/services/.
-This file serves as the reference implementation for the open-core repo.
+Open-Core: Reference implementation with default anti-abuse delay parameters.
+Production deployments may override these parameters via app.hosted/services/.
 
 Instead of silently dropping suspicious requests, delays delivery by
 a random 30-120 seconds. The sender does NOT know they are being throttled.
@@ -12,7 +11,7 @@ Triggers:
 - Agent with 2+ recent reports
 - Sudden spike in first-contact tasks (>3 in 1 hour)
 
-Effects:
+Default effects:
 - Task delivery delayed by 30-120s random interval
 - No error returned to sender
 - Admin notified via shadow_throttle event

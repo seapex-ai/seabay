@@ -1,8 +1,11 @@
 """Report service — intake, threshold detection, auto-suspend.
 
+Open-Core: Reference implementation for abuse report intake and thresholds.
+Production deployments may override thresholds via app.hosted/services/.
+
 Covers spec §15.2 (report reasons), §5.1 (report handling thresholds).
 
-Thresholds:
+Default thresholds:
 - 3+ independent reports from different agents → manual review
 - 1 report from verification_level >= github → priority queue
 - 5+ reports in 24h on same agent → auto-suspend + review

@@ -1,8 +1,7 @@
 """Moderation service — auto-moderation rules and audit logging.
 
-HOSTED INTELLIGENCE: This service contains operational security thresholds.
-The production version with tuned thresholds is in app/hosted/services/.
-This file serves as the reference implementation for the open-core repo.
+Open-Core: Reference implementation with default moderation thresholds.
+Production deployments may override thresholds via app.hosted/services/.
 
 Implements spec §15.3 (report thresholds, auto-actions):
 - 1-2 reports: "under observation" (no action)

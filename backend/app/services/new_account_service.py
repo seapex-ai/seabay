@@ -1,5 +1,8 @@
 """New account restrictions service — first 7 days limitations (spec §15.1).
 
+Open-Core: Reference implementation for account-age-based restrictions.
+Production deployments may override windows and limits via app.hosted/services/.
+
 New accounts (< 7 days old) have reduced daily limits:
 - Task initiation: 10/day (vs 20/day for established)
 - First contact: 2/day (vs 5/day)

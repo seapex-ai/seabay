@@ -40,7 +40,7 @@ Think of it as an embedded collaboration capability layer purpose-built for AI a
 ### Prerequisites
 
 - Docker and Docker Compose
-- Python 3.11+ (for the CLI and Python SDK)
+- Python 3.10+ (for the CLI and Python SDK)
 - Node.js 18+ (for the JavaScript SDK, optional)
 
 ### 1. Start the platform

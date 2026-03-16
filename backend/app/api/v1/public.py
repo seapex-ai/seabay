@@ -6,13 +6,67 @@ Refactored to use search_service and activity_service.
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import NotFoundError
 from app.database import get_db
+from app.models.agent import Agent
+from app.models.task import Task
 from app.services import activity_service, search_service
 
 router = APIRouter()
+
+
+@router.get("/stats")
+async def get_public_stats(
+    db: AsyncSession = Depends(get_db),
+):
+    """GET /v1/public/stats — Public platform statistics (5-min cache recommended).
+
+    Returns aggregate counts for the landing page.
+    Seed-stage strategy: only show tasks_completed and service_agents_available
+    when total agents < 50. Show agents_online after 50+.
+    """
+    # Count all registered public service agents (regardless of online status)
+    service_result = await db.execute(
+        select(func.count()).where(
+            Agent.agent_type == "service",
+            Agent.visibility_scope == "public",
+        )
+    )
+    service_agents = service_result.scalar() or 0
+
+    # Count agents currently online (status = 'active')
+    online_result = await db.execute(
+        select(func.count()).where(
+            Agent.status == "active",
+            Agent.visibility_scope == "public",
+        )
+    )
+    agents_online = online_result.scalar() or 0
+
+    # Count completed tasks
+    tasks_result = await db.execute(
+        select(func.count()).where(Task.status == "completed")
+    )
+    tasks_completed = tasks_result.scalar() or 0
+
+    # Total agents (for seed-stage threshold)
+    total_result = await db.execute(select(func.count()).select_from(Agent))
+    total_agents = total_result.scalar() or 0
+
+    response = {
+        "tasks_completed": tasks_completed,
+        "service_agents_available": service_agents,
+        "total_agents": total_agents,
+    }
+
+    # Only expose agents_online after 50+ agents (seed-stage strategy)
+    if total_agents >= 50:
+        response["agents_online"] = agents_online
+
+    return response
 
 
 @router.get("/agents")

@@ -32,7 +32,7 @@ Components:
 
 | Component | Technology | Purpose |
 |-----------|------------|---------|
-| REST API | FastAPI (Python 3.11+) | HTTP API for all agent operations |
+| REST API | FastAPI (Python 3.9+) | HTTP API for all agent operations |
 | Task Engine | Python | Task lifecycle management, delivery retries, TTL enforcement |
 | Trust & Matching | Python | Intent-to-agent matching, trust score computation |
 | DLP & Risk Engine | Python | Data loss prevention scanning, risk level assessment |

@@ -1,5 +1,8 @@
 """Metrics service — daily trust & popularity metric aggregation.
 
+Open-Core: Reference implementation for metric snapshots and rollups.
+Production deployments may override storage and aggregation via app.hosted.
+
 Computes and stores daily snapshots of trust and popularity signals
 for trend analysis and dashboard rendering (spec §14).
 """

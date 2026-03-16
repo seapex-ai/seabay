@@ -21,6 +21,7 @@ open_core:
     - README.zh-CN.md
     - CHANGELOG.md
     - ROADMAP.md
+    - sbom.json
     - docker-compose.yml
     - docker-compose.prod.yml
     - .gitignore
@@ -32,6 +33,7 @@ open_core:
     include:
       - app/models/           # All data models (frozen contract)
       - app/schemas/          # All Pydantic schemas (EXCEPT admin.py)
+      - app/cards/            # Card builders used by widget/reference integrations
       - app/core/             # security, id_generator, exceptions, middleware, rate_limiter
       - app/database.py
       - app/config.py
@@ -45,11 +47,12 @@ open_core:
       - Dockerfile
       - entrypoint.sh
       - .env.example
-      - tests/                # All tests
+      - tests/                # All tests (EXCEPT private-only admin tests)
 
     exclude:
       - app/schemas/admin.py  # Admin schemas — MUST NOT be in public repo
       - app/hosted/           # Production overrides — MUST NOT be in public repo
+      - tests/test_admin.py   # Admin-only tests depend on the private admin API
 
     # Open-core services (full implementations, no hosted override exists)
     services_open:
@@ -110,11 +113,13 @@ open_core:
     - helm-lite/
     - reference-stack/
 
-  # Website and docs — all open
+  # Docs and scripts — open
   web:
-    - website/
     - docs/
     - scripts/
+
+  # Phase 2 (deferred — not in first-wave open-core release)
+  # website/  — publicly accessible at seabay.ai but source deferred per frozen spec
 
 # ══════════════════════════════════════════════════════════════
 # Files that MUST NOT be in the public repo (hosted intelligence)

@@ -23,7 +23,7 @@ rm -rf "${OUTPUT}"
 mkdir -p "${OUTPUT}"
 
 # ── Root files (whitelisted) ──
-for f in LICENSE NOTICE README.md README.zh-CN.md CHANGELOG.md ROADMAP.md \
+for f in LICENSE NOTICE README.md README.zh-CN.md CHANGELOG.md ROADMAP.md sbom.json \
          docker-compose.yml docker-compose.prod.yml .gitignore \
          .opencore-manifest.yml; do
   [ -f "${REPO_ROOT}/${f}" ] && cp "${REPO_ROOT}/${f}" "${OUTPUT}/"
@@ -33,8 +33,10 @@ done
 [ -d "${REPO_ROOT}/.github" ] && cp -r "${REPO_ROOT}/.github" "${OUTPUT}/"
 
 # ── Full directories (all open per manifest) ──
+# NOTE: website/ is deferred to phase 2 per frozen spec (portal-demo/landing-demo).
+# Website remains publicly accessible at seabay.ai but source is not in V1 open-core.
 for dir in sdk-py sdk-js cli adapters widgets skill specs examples \
-           helm-lite reference-stack website docs scripts; do
+           helm-lite reference-stack docs scripts; do
   [ -d "${REPO_ROOT}/${dir}" ] && cp -r "${REPO_ROOT}/${dir}" "${OUTPUT}/"
 done
 
@@ -53,6 +55,7 @@ done
 
 # Tests
 [ -d "${REPO_ROOT}/backend/tests" ] && cp -r "${REPO_ROOT}/backend/tests" "${OUTPUT}/backend/"
+rm -f "${OUTPUT}/backend/tests/test_admin.py"
 
 # ── Backend app root-level files ──
 mkdir -p "${OUTPUT}/backend/app"
@@ -61,7 +64,7 @@ for f in "${REPO_ROOT}"/backend/app/*.py; do
 done
 
 # ── Backend app directories (whitelisted, NO hosted/) ──
-for dir in models schemas core workers; do
+for dir in models schemas cards core workers; do
   if [ -d "${REPO_ROOT}/backend/app/${dir}" ]; then
     cp -r "${REPO_ROOT}/backend/app/${dir}" "${OUTPUT}/backend/app/"
   fi

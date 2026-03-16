@@ -15,8 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Profile page: extract slug from URL path, not just query params (GAP-04)
 - Website: update stats to actual values (74 endpoints, 21 tables, 39 test files)
 - Website: fix System Status link to point to status.seabay.ai
-- Website: update GitHub org links from seapex-ai to seabayai
+- Website: update GitHub org links from `seabayai` to `seapex-ai`
 - ToS: replace draft language with final terms
+- Open-core export: include `backend/app/cards/` so public card tests can run
+- Open-core export: exclude `backend/tests/test_admin.py` from the public repo
+- Public docs/site: align Python install requirement to `Python 3.10+`
+- Public repo metadata: align package and repository references for next export
 
 ---
 
@@ -65,4 +69,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 Copyright 2026 The Seabay Authors. Licensed under Apache-2.0.
-
