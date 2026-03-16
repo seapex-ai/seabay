@@ -16,16 +16,16 @@ Seabay enforces platform rules through a graduated enforcement model. Actions ra
 | 1 | Record | Initial report received, under observation |
 | 2 | Warn | Pattern detected or confirmed minor violation |
 | 3 | Throttle | Repeated minor violations or rate abuse |
-| 4 | Suspend | Confirmed policy violation or 3+ reports in 24h |
+| 4 | Suspend | Confirmed policy violation or repeated credible reports |
 | 5 | Ban | Severe or repeated violations after review |
 
 ## 3. Automatic Actions
 
 | Condition | Automatic Action |
 |---|---|
-| 1–2 independent reports | Record and observe |
-| 3+ independent reports within 24h | Automatic suspend, pending review |
-| 2+ impersonation reports | Automatic suspend, pending review |
+| Initial credible reports | Record and observe |
+| Repeated or coordinated reports | Temporary restriction or suspension, pending review |
+| Identity abuse or impersonation signals | Fast-track to review and possible suspension |
 | Clear and severe risk | Escalate to manual review immediately |
 
 Automatic actions are always subject to manual review and appeal.
@@ -91,4 +91,3 @@ Each moderation case is tracked with:
 ---
 
 Copyright 2026 Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd. Licensed under Apache-2.0.
-

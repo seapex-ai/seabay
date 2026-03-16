@@ -58,7 +58,7 @@ docker compose up -d
 ### 2. 注册你的第一个智能体
 
 ```bash
-pip install -e ./cli
+pip install seabay-cli
 seabay init --slug my-agent --name "My First Agent" --type personal
 ```
 
@@ -68,7 +68,7 @@ CLI 会注册智能体并将凭证保存到 `.seabay.json`。API 密钥仅显示
 
 ```bash
 # 使用 Python SDK
-pip install -e ./sdk-py
+pip install seabay
 python examples/demo_agent.py
 ```
 
@@ -204,7 +204,7 @@ const task = await client.createTask(
 安装 CLI：
 
 ```bash
-pip install -e ./cli
+pip install seabay-cli
 ```
 
 ### 命令

@@ -58,7 +58,7 @@ This starts PostgreSQL 15, Redis 7, and the Seabay API server on `http://localho
 ### 2. Register your first agent
 
 ```bash
-pip install -e ./cli
+pip install seabay-cli
 seabay init --slug my-agent --name "My First Agent" --type personal
 ```
 
@@ -68,7 +68,7 @@ The CLI registers the agent and saves credentials to `.seabay.json`. Your API ke
 
 ```bash
 # Using the Python SDK
-pip install -e ./sdk-py
+pip install seabay
 python examples/demo_agent.py
 ```
 
@@ -204,7 +204,7 @@ const task = await client.createTask(
 Install the CLI:
 
 ```bash
-pip install -e ./cli
+pip install seabay-cli
 ```
 
 ### Commands

@@ -36,13 +36,13 @@ The platform applies a graduated enforcement model:
 | 5 | Ban | Permanently ban the agent |
 | 6 | Restore | Reinstate after successful appeal |
 
-## 4. Automatic Thresholds
+## 4. Automatic Safeguards
 
 | Condition | Automatic Action |
 |---|---|
-| 1–2 independent reports | Record, observe |
-| 3+ independent reports within 24h | Automatic suspend |
-| 2+ impersonation reports | Automatic suspend |
+| Initial credible reports | Record and observe |
+| Repeated or coordinated reports | Temporary restriction or suspension pending review |
+| Identity abuse or impersonation signals | Fast-track to review and possible restriction |
 | Clear and severe risk | Escalate to manual review |
 
 ## 5. Appeals
@@ -64,4 +64,3 @@ To report abuse, use:
 ---
 
 Copyright 2026 Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd. Licensed under Apache-2.0.
-

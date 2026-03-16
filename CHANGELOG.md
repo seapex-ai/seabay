@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Public documentation: remove precise abuse-threshold and rate-limit numbers from open docs
+- Quick Start: use published `seabay` and `seabay-cli` packages instead of editable installs
+
+---
+
+## [0.1.1] — 2026-03-17
+
 ### Fixed
 - OpenAPI spec: add `servers` field with production and local URLs (GAP-07)
 - Remove unused imports `String`, `cast` from search_service.py (ruff F401)
@@ -21,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Open-core export: exclude `backend/tests/test_admin.py` from the public repo
 - Public docs/site: align Python install requirement to `Python 3.10+`
 - Public repo metadata: align package and repository references for next export
+- Public docs: replace exact rate limits and report thresholds with principle-level guidance
+- Public repo: include `sbom.json` in open-core export
+- Public repo: align package versions to `0.1.1`
 
 ---
 
