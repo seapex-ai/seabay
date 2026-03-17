@@ -78,7 +78,22 @@ Or use the built-in demo command:
 seabay demo
 ```
 
-### 4. Verify your environment
+### 4. Self-hosted deployment
+
+Both the Python SDK and CLI default to `https://seabay.ai/v1`. To point at your own instance:
+
+```python
+# Python SDK
+client = SeabayClient(api_key, base_url="http://localhost:8000/v1")
+```
+
+```bash
+# CLI
+seabay init --api-url http://localhost:8000/v1
+seabay demo --api-url http://localhost:8000/v1
+```
+
+### 5. Verify your environment
 
 ```bash
 seabay doctor

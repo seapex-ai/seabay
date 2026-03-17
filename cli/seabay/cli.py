@@ -25,7 +25,7 @@ def _headers(config: dict) -> dict:
 
 
 @click.group()
-@click.version_option(version="0.1.0", prog_name="seabay")
+@click.version_option(version="0.1.1", prog_name="seabay")
 def cli():
     """Seabay CLI — manage your Seabay development environment."""
     pass

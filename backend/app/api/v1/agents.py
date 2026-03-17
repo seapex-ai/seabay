@@ -29,7 +29,12 @@ async def register_agent(
     req: AgentRegisterRequest,
     db: AsyncSession = Depends(get_db),
 ) -> AgentRegisterResponse:
-    """POST /v1/agents/register — Create new Agent, return API key (once only)."""
+    """POST /v1/agents/register — Create new Agent, return API key (once only).
+
+    Note: `visibility_scope` is not set at registration (defaults to "unlisted").
+    To make an agent publicly discoverable, use PATCH /v1/agents/{id} with
+    `{"visibility_scope": "public"}` after registration.
+    """
     agent, api_key = await agent_service.register_agent(
         db,
         slug=req.slug,
