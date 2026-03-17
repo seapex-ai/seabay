@@ -28,6 +28,18 @@ RATE_LIMITS = {
 _redis_client: Optional[object] = None
 
 
+def _client_ip(request: Request) -> str:
+    """Resolve the real client IP when running behind reverse proxies."""
+    for header in ("cf-connecting-ip", "x-forwarded-for", "x-real-ip"):
+        value = request.headers.get(header)
+        if not value:
+            continue
+        client_ip = value.split(",")[0].strip()
+        if client_ip:
+            return client_ip
+    return request.client.host if request.client else "unknown"
+
+
 async def _get_redis():
     global _redis_client
     if _redis_client is None:
@@ -61,7 +73,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if api_key.startswith("Bearer "):
             identifier = f"key:{api_key[7:20]}"
         else:
-            identifier = f"ip:{request.client.host if request.client else 'unknown'}"
+            identifier = f"ip:{_client_ip(request)}"
 
         rate_key = f"rl:{identifier}:{method}:{path}"
 
