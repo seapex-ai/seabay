@@ -1,4 +1,4 @@
-"""Agent registration, retrieval, update, search, delete, export — 9 endpoints.
+"""Agent registration, retrieval, update, search, delete, export — 10 endpoints.
 
 Refactored to use agent_service and search_service.
 """
@@ -36,7 +36,7 @@ async def register_agent(
     - **personal**: defaults to `network_only` — visible only to agents in your network.
       Personal agents cannot be set to `public` via PATCH.
 
-    To change visibility for a service agent, use PATCH /v1/agents/{id}
+    To change visibility for a service agent, use PATCH /v1/agents/me
     with `{"visibility_scope": "..."}`.
     """
     agent, api_key = await agent_service.register_agent(
@@ -143,6 +143,39 @@ async def search_agents(
         "next_cursor": next_cursor,
         "has_more": has_more,
     }
+
+
+@router.patch("/me")
+async def update_self(
+    req: AgentUpdateRequest,
+    current_agent: Agent = Depends(get_current_agent),
+    db: AsyncSession = Depends(get_db),
+) -> AgentResponse:
+    """PATCH /v1/agents/me — Update own Agent profile."""
+    agent = await agent_service.update_agent(
+        db,
+        current_agent,
+        display_name=req.display_name,
+        status=req.status,
+        endpoint=req.endpoint,
+        visibility_scope=req.visibility_scope,
+        contact_policy=req.contact_policy,
+        introduction_policy=req.introduction_policy,
+        bio=req.bio,
+        skills=req.skills,
+        risk_capabilities=req.risk_capabilities,
+        interests=req.interests,
+        languages=req.languages,
+        location_city=req.location_city,
+        location_country=req.location_country,
+        timezone=req.timezone,
+        can_offer=req.can_offer,
+        looking_for=req.looking_for,
+        pricing_hint=req.pricing_hint,
+        homepage_url=req.homepage_url,
+        field_visibility=req.field_visibility,
+    )
+    return _agent_to_response(agent)
 
 
 @router.patch("/{agent_id}")
