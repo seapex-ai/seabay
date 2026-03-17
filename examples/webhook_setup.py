@@ -17,8 +17,6 @@ from threading import Thread
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "sdk-py"))
 
-from seabay.client import SeabayClient
-
 BASE_URL = os.getenv("SEABAY_URL", "http://localhost:8000/v1")
 WEBHOOK_PORT = 9999
 
@@ -34,7 +32,7 @@ class WebhookHandler(BaseHTTPRequestHandler):
         signature = self.headers.get("X-Seabay-Signature")
         event_type = self.headers.get("X-Seabay-Event")
 
-        print(f"\n📨 Webhook received!")
+        print("\n📨 Webhook received!")
         print(f"   Event: {event_type}")
         if signature:
             print(f"   Signature: {signature[:20]}...")
@@ -71,8 +69,6 @@ def main():
 
     # Start local webhook receiver
     server = start_webhook_server()
-
-    client = SeabayClient(api_key, base_url=BASE_URL)
 
     # ── Step 1: Configure webhook ──
     print("\n=== Step 1: Configure Webhook ===")

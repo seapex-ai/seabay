@@ -16,8 +16,8 @@ jobs:
           python-version: "3.12"
       - name: Install ruff
         run: pip install ruff
-      - name: Lint backend
-        run: ruff check backend/
+      - name: Lint public Python surfaces
+        run: ruff check backend adapters examples
 
   test-unit:
     runs-on: ubuntu-latest
