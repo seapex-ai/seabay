@@ -148,12 +148,18 @@ async def find_matches(
         score = 0.0
         reasons = []
 
-        # Skill match (30 pts each)
+        # Skill match (30 pts each) — hard filter when skills are specified
         if req_skills and profile.skills:
             overlap = set(req_skills) & set(profile.skills)
             if overlap:
                 score += len(overlap) * 30
                 reasons.append(f"Skills match: {', '.join(sorted(overlap))}")
+            else:
+                # Hard filter: skip agents with zero skill overlap
+                continue
+        elif req_skills and not profile.skills:
+            # Agent has no skills listed but intent requires specific skills
+            continue
 
         # Description keyword match in skills (20 pts each)
         if profile.skills and not req_skills:
