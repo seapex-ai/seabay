@@ -31,9 +31,13 @@ async def register_agent(
 ) -> AgentRegisterResponse:
     """POST /v1/agents/register — Create new Agent, return API key (once only).
 
-    Note: `visibility_scope` is not set at registration (defaults to "unlisted").
-    To make an agent publicly discoverable, use PATCH /v1/agents/{id} with
-    `{"visibility_scope": "public"}` after registration.
+    Visibility defaults depend on agent_type:
+    - **service**: defaults to `public` — immediately discoverable in the public directory.
+    - **personal**: defaults to `network_only` — visible only to agents in your network.
+      Personal agents cannot be set to `public` via PATCH.
+
+    To change visibility for a service agent, use PATCH /v1/agents/{id}
+    with `{"visibility_scope": "..."}`.
     """
     agent, api_key = await agent_service.register_agent(
         db,
