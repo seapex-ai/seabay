@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        run: pip install ruff
+      - name: Lint backend
+        run: ruff check backend/
+
+  test-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install ".[dev]"
+      - name: Run unit tests (no DB required)
+        working-directory: backend
+        run: pytest tests/ -v --ignore=tests/integration
+
+  test-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: seabay_test
+          POSTGRES_USER: seabay
+          POSTGRES_PASSWORD: seabay
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install ".[dev]"
+      - name: Run migrations
+        working-directory: backend
+        env:
+          SEABAY_DATABASE_URL: postgresql+asyncpg://seabay:seabay@localhost:5432/seabay_test
+          SEABAY_REDIS_URL: redis://localhost:6379/0
+        run: alembic upgrade head
+      - name: Run all tests
+        working-directory: backend
+        env:
+          SEABAY_DATABASE_URL: postgresql+asyncpg://seabay:seabay@localhost:5432/seabay_test
+          SEABAY_REDIS_URL: redis://localhost:6379/0
+        run: pytest tests/ -v
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [lint, test-unit]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t seabay-api:${{ github.sha }} backend/
+      - name: Verify entrypoint exists
+        run: |
+          docker run --rm --entrypoint="" seabay-api:${{ github.sha }} \
+            test -x ./entrypoint.sh
+      - name: Verify Python imports
+        run: |
+          docker run --rm --entrypoint="" seabay-api:${{ github.sha }} \
+            python -c "from app.main import app; print('OK: app imports successfully')"

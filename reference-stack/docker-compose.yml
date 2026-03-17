@@ -1,0 +1,54 @@
+# Reference Stack — Minimal self-hosted Seabay deployment
+# Usage: docker compose up -d
+# This runs the minimum viable set: PostgreSQL + Redis + API server
+# NOTE: For local development only. Use strong secrets in production.
+
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: seabay
+      POSTGRES_USER: seabay
+      POSTGRES_PASSWORD: seabay_ref
+    ports:
+      - "5432:5432"
+    volumes:
+      - ref_pg_data:/var/lib/postgresql/data
+      - ../specs/sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U seabay"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      SEABAY_DATABASE_URL: postgresql+asyncpg://seabay:seabay_ref@postgres:5432/seabay
+      SEABAY_REDIS_URL: redis://redis:6379/0
+      SEABAY_DEBUG: "true"
+      SEABAY_REGION: intl
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  ref_pg_data:
