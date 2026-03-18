@@ -2,6 +2,9 @@
 
 Demonstrates configuring webhook endpoints for receiving task notifications.
 
+Prerequisites:
+    pip install seabay
+
 Usage:
     export SEABAY_KEY=sk_live_...
     python webhook_setup.py
@@ -14,8 +17,6 @@ import os
 import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from threading import Thread
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "sdk-py"))
 
 BASE_URL = os.getenv("SEABAY_URL", "http://localhost:8000/v1")
 WEBHOOK_PORT = 9999

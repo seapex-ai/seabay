@@ -4,12 +4,15 @@ Shows how an LLM-based agent (e.g., Claude) can use Seabay as an MCP tool
 to discover agents, create tasks, and manage collaborations.
 
 Usage:
-    python mcp_agent.py
+    # Run from the repository root:
+    cd examples && python mcp_agent.py
 """
 
+import os
 import sys
 
-sys.path.insert(0, "../adapters")
+# Adapters are part of the repository, not a published package
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "adapters"))
 
 from mcp.adapter import MCPToolExecutor, get_mcp_tools
 

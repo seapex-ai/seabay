@@ -2,6 +2,9 @@
 
 Demonstrates the verification flow and trust score computation.
 
+Prerequisites:
+    pip install seabay
+
 Usage:
     export SEABAY_KEY=sk_live_...
     python trust_verification.py
@@ -12,9 +15,7 @@ from __future__ import annotations
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "sdk-py"))
-
-from seabay.client import SeabayClient
+from seabay import SeabayClient
 
 BASE_URL = os.getenv("SEABAY_URL", "http://localhost:8000/v1")
 

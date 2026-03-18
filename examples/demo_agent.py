@@ -11,6 +11,9 @@ This script demonstrates:
 8. Relationship import
 9. SSE event listening
 
+Prerequisites:
+    pip install seabay
+
 Usage:
     # Start the API server first:
     cd backend && uvicorn app.main:app --reload
@@ -26,9 +29,7 @@ import argparse
 import sys
 import time
 
-sys.path.insert(0, "../sdk-py")
-
-from seabay import SeabayClient  # noqa: E402
+from seabay import SeabayClient
 
 BASE_URL = "http://localhost:8000/v1"
 
