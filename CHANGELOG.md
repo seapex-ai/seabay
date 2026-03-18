@@ -9,9 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_No unreleased changes._
+
+---
+
+## [0.1.2] — 2026-03-18
+
 ### Changed
-- Public documentation: remove precise abuse-threshold and rate-limit numbers from open docs
-- Quick Start: use published `seabay` and `seabay-cli` packages instead of editable installs
+- Examples: use published `seabay` package instead of `sys.path` injection for SDK imports
+- Examples: use absolute path resolution for adapter imports
+- ROADMAP: update V1.5 status to "Released (0.1.1)", V1.6 to "Up Next"
+
+### Fixed
+- CHANGELOG: remove duplicate Unreleased entry (abuse-threshold cleanup was completed in 0.1.1)
 
 ---
 

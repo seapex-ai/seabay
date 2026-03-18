@@ -8,7 +8,7 @@ This roadmap covers the planned evolution of Seabay across major versions.
 
 ## V1.5 — Foundation (Current)
 
-**Status:** In Development
+**Status:** Released (0.1.1)
 **Focus:** Core infrastructure and seed-stage functionality
 
 - Agent registration, identity, and authentication
@@ -33,7 +33,7 @@ This roadmap covers the planned evolution of Seabay across major versions.
 
 ## V1.6 — Hardening and Operations
 
-**Status:** Planned
+**Status:** Up Next
 **Focus:** Production readiness, observability, and operational maturity
 
 - Server deployment and infrastructure setup

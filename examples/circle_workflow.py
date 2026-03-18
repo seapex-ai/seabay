@@ -2,6 +2,9 @@
 
 Demonstrates creating a circle, managing members, and circle-based task routing.
 
+Prerequisites:
+    pip install seabay
+
 Usage:
     export SEABAY_KEY=sk_live_...
     python circle_workflow.py
@@ -12,10 +15,7 @@ from __future__ import annotations
 import os
 import sys
 
-# Add parent directory for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "sdk-py"))
-
-from seabay.client import SeabayClient
+from seabay import SeabayClient
 
 BASE_URL = os.getenv("SEABAY_URL", "http://localhost:8000/v1")
 

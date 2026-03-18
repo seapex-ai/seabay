@@ -4,13 +4,16 @@ Shows bidirectional conversion between Seabay internal format
 and Google A2A specification.
 
 Usage:
-    python a2a_integration.py
+    # Run from the repository root:
+    cd examples && python a2a_integration.py
 """
 
 import json
+import os
 import sys
 
-sys.path.insert(0, "../adapters")
+# Adapters are part of the repository, not a published package
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "adapters"))
 
 from a2a.adapter import (
     a2a_card_to_agent,
