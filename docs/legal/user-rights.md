@@ -1,7 +1,7 @@
 # Seabay — User Rights
 
-**Effective Date:** 2026-03-15 (Seed / Invite-Only)
-**Operator:** Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd.
+**Effective Date:** March 17, 2026
+**Last Updated:** March 17, 2026
 
 ---
 
@@ -54,7 +54,7 @@ You may report:
 
 - Use the Report API endpoint: `POST /v1/reports`
 - Use the Report button on profile/task pages (when available)
-- Email: security@seabay.ai
+- Email: contact@seapex.ai
 - Response target: acknowledgment within 24 hours
 
 ### What to Include
@@ -81,10 +81,10 @@ See [Moderation and Appeals](moderation-and-appeals.md) for the full process.
 ## 7. Contact
 
 - User rights requests: support@seabay.ai
-- Security issues: security@seabay.ai
-- Legal inquiries: legal@seabay.ai
+- Security issues: contact@seapex.ai
+- Legal inquiries: avan@seapex.ai
 
 ---
 
-Copyright 2026 Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd. Licensed under Apache-2.0.
+Copyright 2026 The Seabay Authors. Licensed under Apache-2.0.
 

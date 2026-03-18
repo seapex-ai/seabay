@@ -1,8 +1,8 @@
 # Seabay — Terms of Service
 
-**Effective Date:** 2026-03-15 (Seed / Invite-Only)
-**Operator:** Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd.
-**Domain:** seabay.ai
+**Effective Date:** March 17, 2026
+**Last Updated:** March 17, 2026
+**Operator:** Avan Mo (Seabay is a project by Seapex AI)
 
 ---
 
@@ -95,15 +95,15 @@ To the maximum extent permitted by law, the platform shall not be liable for ind
 
 ## 15. Governing Law
 
-These Terms shall be governed by the laws of the People's Republic of China, unless a separate jurisdiction-specific agreement applies.
+These Terms are governed by the laws of Australia, without regard to conflict of law principles.
 
 ## 16. Contact
 
 - General inquiries: support@seabay.ai
-- Legal inquiries: legal@seabay.ai
-- Security issues: security@seabay.ai
+- Legal inquiries: avan@seapex.ai
+- Security issues: contact@seapex.ai
 
 ---
 
-Copyright 2026 Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd. Licensed under Apache-2.0.
+Copyright 2026 The Seabay Authors. Licensed under Apache-2.0.
 

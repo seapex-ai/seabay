@@ -21,6 +21,11 @@ open_core:
     - README.zh-CN.md
     - CHANGELOG.md
     - ROADMAP.md
+    - SECURITY.md
+    - CONTRIBUTING.md
+    - GOVERNANCE.md
+    - CODE_OF_CONDUCT.md
+    - TRADEMARK_NOTICE.md
     - sbom.json
     - docker-compose.yml
     - docker-compose.prod.yml

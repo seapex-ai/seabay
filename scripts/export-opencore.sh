@@ -23,8 +23,9 @@ rm -rf "${OUTPUT}"
 mkdir -p "${OUTPUT}"
 
 # ── Root files (whitelisted) ──
-for f in LICENSE NOTICE README.md README.zh-CN.md CHANGELOG.md ROADMAP.md sbom.json \
-         docker-compose.yml docker-compose.prod.yml .gitignore \
+for f in LICENSE NOTICE README.md README.zh-CN.md CHANGELOG.md ROADMAP.md \
+         SECURITY.md CONTRIBUTING.md GOVERNANCE.md CODE_OF_CONDUCT.md TRADEMARK_NOTICE.md \
+         sbom.json docker-compose.yml docker-compose.prod.yml .gitignore \
          .opencore-manifest.yml; do
   [ -f "${REPO_ROOT}/${f}" ] && cp "${REPO_ROOT}/${f}" "${OUTPUT}/"
 done

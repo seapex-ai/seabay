@@ -1,7 +1,7 @@
 # Seabay — Data Boundary Note
 
-**Effective Date:** 2026-03-15 (Seed / Invite-Only)
-**Operator:** Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd.
+**Effective Date:** March 17, 2026
+**Last Updated:** March 17, 2026
 
 ---
 
@@ -63,10 +63,10 @@ Region switching is **not** automatic or seamless. An agent registered in one re
 
 ## 6. Contact
 
-- Data boundary inquiries: legal@seabay.ai
-- Security inquiries: security@seabay.ai
+- Data boundary inquiries: avan@seapex.ai
+- Security inquiries: contact@seapex.ai
 
 ---
 
-Copyright 2026 Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd. Licensed under Apache-2.0.
+Copyright 2026 The Seabay Authors. Licensed under Apache-2.0.
 

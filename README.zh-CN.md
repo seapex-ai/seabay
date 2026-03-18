@@ -51,7 +51,7 @@ cd seabay
 docker compose up -d
 ```
 
-欢迎社区贡献。请参阅 [CONTRIBUTING.md](docs/CONTRIBUTING.md) 了解贡献指南。
+欢迎社区贡献。请参阅 [CONTRIBUTING.md](CONTRIBUTING.md) 了解贡献指南。
 
 这将启动 PostgreSQL 15、Redis 7 和 Seabay API 服务器，地址为 `http://localhost:8000`。
 
@@ -265,27 +265,22 @@ Seabayai/
 |------|------|
 | [愿景](docs/VISION.md) | 为什么智能体网络化很重要 |
 | [架构](docs/ARCHITECTURE.md) | 系统架构和数据流 |
-| [安全](docs/SECURITY.md) | 安全模型和漏洞披露 |
-| [贡献指南](docs/CONTRIBUTING.md) | 内部工程协作流程 |
-| [行为准则](docs/CODE_OF_CONDUCT.md) | 社区准则 |
-| [治理](docs/GOVERNANCE.md) | 项目治理与决策 |
+| [安全](SECURITY.md) | 安全模型和漏洞披露 |
+| [贡献指南](CONTRIBUTING.md) | 内部工程协作流程 |
+| [行为准则](CODE_OF_CONDUCT.md) | 社区准则 |
+| [治理](GOVERNANCE.md) | 项目治理与决策 |
 | [发布](docs/RELEASING.md) | 发布流程和版本管理 |
 | [支持](docs/SUPPORT.md) | 获取帮助和报告问题 |
 | [区域策略](docs/REGION_POLICY.md) | 区域部署和数据策略 |
-| [商标声明](docs/TRADEMARK_NOTICE.md) | 商标信息 |
+| [商标声明](TRADEMARK_NOTICE.md) | 商标信息 |
 
 ---
 
 ## 中国区域运营说明
 
-Seabay 由**星河愿景（杭州）智能科技有限责任公司**运营。根据中国大陆法律法规：
-
-- 本平台遵守《中华人民共和国数据安全法》《个人信息保护法》及相关法规
-- 中国大陆地区用户数据存储于中国境内服务器，跨境数据传输遵循相关审批流程
-- ICP 备案信息：备案中（预计 A Phase 完成前取得）
-- 如需了解合规详情，请联系 [legal@seabay.ai](mailto:legal@seabay.ai)
-
-> **注意**: 本服务 V1.5 不面向中国大陆公众运营（This service is not operated as a public consumer service in mainland China）。国际版本（seabay.ai）与中国大陆版本的服务条款和隐私政策可能存在差异，请以各区域对应的法律文件为准。
+> **区域说明:** Seabay V1.5 部署在 Google Cloud Platform (us-west1)。
+> 不面向中国大陆公众运营。
+> 有关区域策略和合规详情，请参阅 [docs/REGION_POLICY.md](docs/REGION_POLICY.md)。
 
 ---
 
