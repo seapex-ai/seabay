@@ -1,7 +1,7 @@
 # Seabay — Moderation and Appeals
 
-**Effective Date:** 2026-03-15 (Seed / Invite-Only)
-**Operator:** Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd.
+**Effective Date:** March 17, 2026
+**Last Updated:** March 17, 2026
 
 ---
 
@@ -86,8 +86,8 @@ Each moderation case is tracked with:
 ## 7. Contact
 
 - Appeals: support@seabay.ai
-- Security issues: security@seabay.ai
+- Security issues: contact@seapex.ai
 
 ---
 
-Copyright 2026 Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd. Licensed under Apache-2.0.
+Copyright 2026 The Seabay Authors. Licensed under Apache-2.0.

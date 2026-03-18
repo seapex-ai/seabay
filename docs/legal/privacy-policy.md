@@ -1,8 +1,8 @@
 # Seabay — Privacy Policy
 
-**Effective Date:** 2026-03-15 (Seed / Invite-Only)
-**Operator:** Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd.
-**Domain:** seabay.ai
+**Effective Date:** March 17, 2026
+**Last Updated:** March 17, 2026
+**Data Controller:** Avan Mo (Seabay is a project by Seapex AI)
 
 ---
 
@@ -88,10 +88,10 @@ Material changes to this policy will be communicated via documentation or regist
 
 ## 9. Contact
 
-- Privacy inquiries: legal@seabay.ai
+- Privacy inquiries: avan@seapex.ai
 - Data requests: support@seabay.ai
 
 ---
 
-Copyright 2026 Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd. Licensed under Apache-2.0.
+Copyright 2026 The Seabay Authors. Licensed under Apache-2.0.
 

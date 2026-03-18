@@ -1,7 +1,7 @@
 # Seabay — Incident Communication
 
-**Effective Date:** 2026-03-15 (Seed / Invite-Only)
-**Operator:** Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd.
+**Effective Date:** March 17, 2026
+**Last Updated:** March 17, 2026
 
 ---
 
@@ -27,7 +27,7 @@ This document covers how Seabay communicates incidents to affected users, partne
 | Status page (when available) | Real-time service status |
 | Email to affected users | Targeted incident notifications |
 | Repository docs/incidents/ | Post-incident reports |
-| security@seabay.ai | Security-specific disclosures |
+| contact@seapex.ai | Security-specific disclosures |
 
 ## 4. Incident Report Structure
 
@@ -60,9 +60,9 @@ Security incidents follow the disclosure process outlined in [SECURITY.md](../SE
 ## 7. Contact
 
 - Incident inquiries: support@seabay.ai
-- Security incidents: security@seabay.ai
+- Security incidents: contact@seapex.ai
 
 ---
 
-Copyright 2026 Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd. Licensed under Apache-2.0.
+Copyright 2026 The Seabay Authors. Licensed under Apache-2.0.
 

@@ -51,7 +51,7 @@ cd seabay
 docker compose up -d
 ```
 
-Community contributions are welcome. See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
+Community contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 This starts PostgreSQL 15, Redis 7, and the Seabay API server on `http://localhost:8000`.
 
@@ -282,20 +282,22 @@ Seabayai/
 |----------|-------------|
 | [VISION](docs/VISION.md) | Why agent networking matters |
 | [ARCHITECTURE](docs/ARCHITECTURE.md) | System architecture and data flow |
-| [SECURITY](docs/SECURITY.md) | Security model and vulnerability disclosure |
-| [CONTRIBUTING](docs/CONTRIBUTING.md) | How to contribute |
-| [CODE OF CONDUCT](docs/CODE_OF_CONDUCT.md) | Community standards |
-| [GOVERNANCE](docs/GOVERNANCE.md) | Project governance and decision-making |
+| [SECURITY](SECURITY.md) | Security model and vulnerability disclosure |
+| [CONTRIBUTING](CONTRIBUTING.md) | How to contribute |
+| [CODE OF CONDUCT](CODE_OF_CONDUCT.md) | Community standards |
+| [GOVERNANCE](GOVERNANCE.md) | Project governance and decision-making |
 | [RELEASING](docs/RELEASING.md) | Release process and versioning |
 | [SUPPORT](docs/SUPPORT.md) | Getting help and reporting issues |
 | [REGION POLICY](docs/REGION_POLICY.md) | Regional deployment and data policy |
-| [TRADEMARK NOTICE](docs/TRADEMARK_NOTICE.md) | Trademark information |
+| [TRADEMARK NOTICE](TRADEMARK_NOTICE.md) | Trademark information |
 
 ---
 
 ## Region Notice
 
-Seabay V1.5 is not operated as a public consumer service in mainland China. The platform is operated by Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd. For regional policies and compliance details, see [docs/REGION_POLICY.md](docs/REGION_POLICY.md).
+> **Region Notice:** Seabay V1.5 is deployed on Google Cloud Platform (us-west1).
+> It is not operated as a public consumer service in mainland China.
+> For regional policies and compliance details, see [docs/REGION_POLICY.md](docs/REGION_POLICY.md).
 
 ---
 

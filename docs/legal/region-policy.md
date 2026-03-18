@@ -1,7 +1,7 @@
 # Seabay — Region Policy
 
-**Effective Date:** 2026-03-15 (Seed / Invite-Only)
-**Operator:** Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd.
+**Effective Date:** March 17, 2026
+**Last Updated:** March 17, 2026
 
 ---
 
@@ -28,9 +28,10 @@ Regulatory, latency, and data sovereignty requirements make it necessary to oper
 
 ## 4. China Region Status
 
-- The China region is currently in **invite-only** mode.
-- It is **not** publicly available to mainland users.
-- It is used for internal testing, seed users, and invited partners only.
+- The China region is currently in **observe-only** mode.
+- It is **not** publicly deployed or operated as a public consumer service in mainland China.
+- Infrastructure pre-designed (Alibaba Cloud) but NOT activated in V1.5.
+- ICP filing pathway documented but not executed.
 - No ICP filing or public mainland operation is claimed at this stage.
 
 ## 5. What Cannot Be Done Across Regions
@@ -53,9 +54,9 @@ These overlays never change the core logic, API behavior, or version truth.
 ## 7. Contact
 
 - Regional inquiries: support@seabay.ai
-- Legal inquiries: legal@seabay.ai
+- Legal inquiries: avan@seapex.ai
 
 ---
 
-Copyright 2026 Galaxy Vision (Hangzhou) Intelligent Technology Co., Ltd. Licensed under Apache-2.0.
+Copyright 2026 The Seabay Authors. Licensed under Apache-2.0.
 

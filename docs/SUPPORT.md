@@ -21,7 +21,7 @@ https://github.com/seapex-ai/seabay/issues
 ### Security Issues
 
 Do NOT file security issues publicly. Instead, email:
-security@seabay.ai
+contact@seapex.ai
 
 See [SECURITY.md](SECURITY.md) for our vulnerability disclosure policy.
 
