@@ -1,0 +1,90 @@
+version: "3.9"
+
+services:
+  # ── PostgreSQL 15 ──
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: seabay
+      POSTGRES_USER: seabay
+      POSTGRES_PASSWORD: seabay
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./specs/sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U seabay"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis ──
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Backend API ──
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      SEABAY_DATABASE_URL: postgresql+asyncpg://seabay:seabay@postgres:5432/seabay
+      SEABAY_REDIS_URL: redis://redis:6379/0
+      SEABAY_DEBUG: "true"
+      SEABAY_REGION: intl
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── MCP Edge ──
+  mcp-edge:
+    build:
+      context: ./apps/mcp-edge
+      dockerfile: Dockerfile
+    ports:
+      - "8100:8100"
+    environment:
+      MCPEDGE_CORE_API_URL: http://api:8000/v1
+      MCPEDGE_REDIS_URL: redis://redis:6379/1
+      MCPEDGE_JWT_SECRET: dev-jwt-secret
+      MCPEDGE_OAUTH_CLIENT_ID: dev-client
+      MCPEDGE_OAUTH_CLIENT_SECRET: dev-secret
+    depends_on:
+      api:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: ["full"]
+
+  # ── Shell Web ──
+  shell-web:
+    build:
+      context: ./shell-web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      api:
+        condition: service_started
+    restart: unless-stopped
+    profiles: ["full"]
+
+volumes:
+  postgres_data:
+  redis_data:

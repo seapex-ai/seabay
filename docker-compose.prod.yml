@@ -1,0 +1,56 @@
+services:
+  # ── PostgreSQL 15 ──
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: seabay
+      POSTGRES_USER: seabay
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U seabay"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ── Redis ──
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ── Backend API ──
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      SEABAY_DATABASE_URL: postgresql+asyncpg://seabay:${POSTGRES_PASSWORD}@postgres:5432/seabay
+      SEABAY_REDIS_URL: redis://redis:6379/0
+      SEABAY_DEBUG: "false"
+      SEABAY_REGION: intl
+      SEABAY_CORS_ORIGINS: ${CORS_ORIGINS}
+      SEABAY_PASSPORT_SIGNING_KEY: ${PASSPORT_SIGNING_KEY}
+      LLM_API_URL: ${LLM_API_URL}
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_MODEL: ${LLM_MODEL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:

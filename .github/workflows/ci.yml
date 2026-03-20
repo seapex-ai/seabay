@@ -1,0 +1,131 @@
+name: CI
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        run: pip install ruff
+      - name: Lint public Python surfaces
+        run: ruff check backend adapters examples apps agents shell-cli --extend-exclude "**/node_modules"
+
+  test-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install ".[dev]"
+      - name: Run unit tests (no DB required)
+        working-directory: backend
+        run: pytest tests/ -v --ignore=tests/integration
+
+  test-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: seabay_test
+          POSTGRES_USER: seabay
+          POSTGRES_PASSWORD: seabay
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install ".[dev]"
+      - name: Run migrations
+        working-directory: backend
+        env:
+          SEABAY_DATABASE_URL: postgresql+asyncpg://seabay:seabay@localhost:5432/seabay_test
+          SEABAY_REDIS_URL: redis://localhost:6379/0
+        run: alembic upgrade head
+      - name: Run all tests
+        working-directory: backend
+        env:
+          SEABAY_DATABASE_URL: postgresql+asyncpg://seabay:seabay@localhost:5432/seabay_test
+          SEABAY_REDIS_URL: redis://localhost:6379/0
+        run: pytest tests/ -v
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [lint, test-unit]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t seabay-api:${{ github.sha }} backend/
+      - name: Verify entrypoint exists
+        run: |
+          docker run --rm --entrypoint="" seabay-api:${{ github.sha }} \
+            test -x ./entrypoint.sh
+      - name: Verify Python imports
+        run: |
+          docker run --rm --entrypoint="" seabay-api:${{ github.sha }} \
+            python -c "from app.main import app; print('OK: app imports successfully')"
+
+  # ── MCP Edge syntax check ──
+  mcp-edge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check MCP Edge
+        run: python -m py_compile apps/mcp-edge/main.py
+      - name: Syntax check all MCP Edge Python
+        run: find apps/mcp-edge -name "*.py" -exec python -m py_compile {} +
+
+  # ── Shell CLI syntax check ──
+  shell-cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check Shell CLI
+        run: find shell-cli -name "*.py" -exec python -m py_compile {} +
+
+  # ── Seed Agents syntax check ──
+  seed-agents:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check all agents
+        run: find agents -name "*.py" -exec python -m py_compile {} +

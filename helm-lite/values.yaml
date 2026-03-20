@@ -1,0 +1,56 @@
+# Seabay Helm Values — Minimal deployment
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/seapex-ai/seabay-api
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: seabay.ai
+      paths:
+        - path: /
+          pathType: Prefix
+
+env:
+  SEABAY_REGION: intl
+  SEABAY_DEBUG: "false"
+
+# WARNING: Override these secrets in production!
+# Use: helm install seabay ./helm-lite --set secrets.databaseUrl="..." --set postgresql.auth.password="..."
+secrets:
+  databaseUrl: "postgresql+asyncpg://seabay:changeme@postgres:5432/seabay"
+  redisUrl: "redis://redis:6379/0"
+
+resources:
+  limits:
+    cpu: "1"
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+postgresql:
+  enabled: true
+  auth:
+    database: seabay
+    username: seabay
+    password: changeme  # Override in production
+  primary:
+    persistence:
+      size: 10Gi
+
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false

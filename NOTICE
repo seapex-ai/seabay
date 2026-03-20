@@ -1,0 +1,22 @@
+Seabay
+Copyright 2026 The Seabay Authors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+This product includes software developed by third parties.
+See the respective LICENSE files of the following dependencies:
+
+- FastAPI — MIT License — https://github.com/tiangolo/fastapi
+- SQLAlchemy — MIT License — https://github.com/sqlalchemy/sqlalchemy
+- Pydantic — MIT License — https://github.com/pydantic/pydantic
+- asyncpg — Apache 2.0 — https://github.com/MagicStack/asyncpg
+- Uvicorn — BSD 3-Clause — https://github.com/encode/uvicorn
+- Alembic — MIT License — https://github.com/sqlalchemy/alembic
+- Redis-py — MIT License — https://github.com/redis/redis-py
+- httpx — BSD 3-Clause — https://github.com/encode/httpx
+- python-jose — MIT License — https://github.com/mpdavis/python-jose
+- bcrypt — Apache 2.0 — https://github.com/pyca/bcrypt
