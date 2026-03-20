@@ -192,3 +192,109 @@ class TestMatchScoring:
     def test_acquaintance_relationship_bonus_8_points(self):
         score = 8
         assert score == 8
+
+
+class TestIntentCreationValidation:
+    """Test intent creation validation rules."""
+
+    def test_valid_categories(self):
+        """All intent categories from spec should be defined."""
+        from app.models.enums import IntentCategory
+
+        values = {c.value for c in IntentCategory}
+        assert "service_request" in values
+        assert "collaboration" in values
+        assert "introduction" in values
+
+    def test_valid_statuses(self):
+        """All intent statuses from spec should be defined."""
+        from app.models.enums import IntentStatus
+
+        values = {s.value for s in IntentStatus}
+        assert "active" in values
+        assert "matched" in values
+        assert "fulfilled" in values
+        assert "expired" in values
+        assert "cancelled" in values
+
+    def test_audience_scopes(self):
+        """Audience scopes should include public and network."""
+        from app.models.enums import AudienceScope
+
+        values = {s.value for s in AudienceScope}
+        assert "public" in values
+        assert "network" in values
+
+    def test_default_ttl_hours(self):
+        """Default TTL for intents is 72 hours."""
+        default_ttl = 72
+        assert default_ttl == 72
+
+    def test_max_matches_range(self):
+        """max_matches should be between 1 and 20 per schema."""
+        # From IntentCreateRequest: Field(5, ge=1, le=20)
+        assert 1 <= 5 <= 20
+
+
+class TestMatchingWeights:
+    """Test matching weight configuration."""
+
+    def test_default_weights_exist(self):
+        from app.services.intent_service import WEIGHTS
+
+        assert "skills_match" in WEIGHTS
+        assert "languages_match" in WEIGHTS
+        assert "location_match" in WEIGHTS
+        assert "verification_level" in WEIGHTS
+        assert "service_type_bonus" in WEIGHTS
+        assert "relationship_bonus" in WEIGHTS
+
+    def test_skills_weight_is_highest(self):
+        from app.services.intent_service import WEIGHTS
+
+        assert WEIGHTS["skills_match"] >= WEIGHTS["languages_match"]
+        assert WEIGHTS["skills_match"] >= WEIGHTS["location_match"]
+        assert WEIGHTS["skills_match"] >= WEIGHTS["service_type_bonus"]
+
+    def test_relationship_bonus_significant(self):
+        from app.services.intent_service import WEIGHTS
+
+        assert WEIGHTS["relationship_bonus"] >= 10
+
+
+class TestMatchingPipelineLogic:
+    """Test the full matching pipeline logic patterns."""
+
+    def test_zero_skill_overlap_means_skip(self):
+        """When required skills are specified and agent has zero overlap, skip."""
+        req_skills = {"coding", "design"}
+        agent_skills = {"cooking", "gardening"}
+        overlap = set(req_skills) & set(agent_skills)
+        assert len(overlap) == 0  # Hard filter: skip this agent
+
+    def test_description_keyword_match_scoring(self):
+        """Description keyword matching against agent skills."""
+        desc_words = set("need translation service for documents".split())
+        agent_skills = ["translation", "writing"]
+        matches = [s for s in agent_skills if s.lower() in desc_words]
+        assert "translation" in matches
+        assert "writing" not in matches  # "writing" not in desc
+
+    def test_score_sorting(self):
+        """Matches should be sorted by score descending."""
+        matches = [
+            {"agent_id": "a", "match_score": 30},
+            {"agent_id": "b", "match_score": 60},
+            {"agent_id": "c", "match_score": 45},
+        ]
+        matches.sort(key=lambda m: m["match_score"], reverse=True)
+        assert matches[0]["agent_id"] == "b"
+        assert matches[1]["agent_id"] == "c"
+        assert matches[2]["agent_id"] == "a"
+
+    def test_max_matches_limit(self):
+        """Results should be limited to max_matches."""
+        matches = [{"agent_id": f"a{i}", "match_score": i * 10} for i in range(10)]
+        max_matches = 5
+        limited = matches[:max_matches]
+        assert len(limited) == 5

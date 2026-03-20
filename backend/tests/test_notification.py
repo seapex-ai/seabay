@@ -1,4 +1,4 @@
-"""Tests for notification service — SSE event bus."""
+"""Tests for notification service — SSE event bus (in-memory fallback)."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ import asyncio
 
 import pytest
 
+from app.services import notification_service
 from app.services.notification_service import (
     _format_sse,
     get_connected_agents,
@@ -13,6 +14,15 @@ from app.services.notification_service import (
     push_event,
     subscribe,
 )
+
+
+@pytest.fixture(autouse=True)
+def _force_in_memory():
+    """Force in-memory mode for all notification tests (no Redis needed)."""
+    notification_service._reset_for_testing()
+    notification_service._redis_available = False
+    yield
+    notification_service._reset_for_testing()
 
 
 class TestSSEFormatting:

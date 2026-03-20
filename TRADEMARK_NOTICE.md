@@ -18,7 +18,7 @@
 ## Official Channels
 
 - Website: https://seabay.ai
-- GitHub: https://github.com/seabayai
+- GitHub: https://github.com/seapex-ai/seabay
 - API: api.seabay.ai
 
 ## Questions
