@@ -1,13 +1,16 @@
-"""Verification service — email, github, domain verification flows.
+"""Verification service — email, github, domain, workspace verification flows.
 
 Handles all verification lifecycle logic:
 - Code generation and expiry
 - Verification completion and agent level update
 - Highest verification level computation
+- DNS TXT record lookup for domain/workspace verification
 """
 
 from __future__ import annotations
 
+import asyncio
+import logging
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional
@@ -15,11 +18,14 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.core.exceptions import InvalidRequestError, NotFoundError
 from app.core.id_generator import generate_id
 from app.models.agent import Agent
 from app.models.enums import VERIFICATION_WEIGHTS, VerificationLevel
 from app.models.verification import Verification
+
+logger = logging.getLogger(__name__)
 
 
 async def start_email_verification(
@@ -140,18 +146,26 @@ async def complete_domain_verification(
     db: AsyncSession,
     agent: Agent,
     verification_id: str,
-    dns_verified: bool = True,
 ) -> Verification:
     """Complete domain verification (DNS lookup confirmation).
 
-    In V1.5 dev: dns_verified defaults to True (auto-verify).
-    Production: perform actual DNS TXT lookup.
+    When DOMAIN_VERIFICATION_AUTO is True (dev default): auto-verify without DNS lookup.
+    When False (production): perform actual DNS TXT record lookup.
     """
     verification = await _get_verification(db, verification_id, agent.id, "domain")
     _check_pending(verification)
 
-    if not dns_verified:
-        raise InvalidRequestError("DNS record not found. Please add the TXT record and retry.")
+    domain = verification.identifier
+    expected_value = verification.verification_code
+
+    if not settings.DOMAIN_VERIFICATION_AUTO:
+        # Production: perform actual DNS TXT lookup
+        dns_verified = await _check_dns_txt_record(f"_seabay.{domain}", expected_value)
+        if not dns_verified:
+            raise InvalidRequestError(
+                "DNS record not found. Please add the TXT record "
+                f"'_seabay.{domain}' with value '{expected_value}' and retry."
+            )
 
     verification.status = "verified"
     verification.verified_at = datetime.now(timezone.utc)
@@ -177,6 +191,74 @@ async def get_verifications(
 
     result = await db.execute(stmt)
     return list(result.scalars().all())
+
+
+async def start_workspace_verification(
+    db: AsyncSession,
+    agent_id: str,
+    workspace_domain: str,
+) -> tuple[Verification, str]:
+    """Start workspace verification by domain ownership.
+
+    The agent must prove they belong to the workspace by adding a DNS TXT
+    record under _seabay-workspace.<domain>. Returns (verification, txt_value).
+    """
+    txt_value = f"seabay-workspace={secrets.token_urlsafe(24)}"
+
+    verification = Verification(
+        id=generate_id("verification"),
+        agent_id=agent_id,
+        method="workspace",
+        status="pending",
+        identifier=workspace_domain,
+        verification_code=txt_value,
+        code_expires_at=datetime.now(timezone.utc) + timedelta(hours=72),
+        extra_metadata={"workspace_domain": workspace_domain},
+    )
+    db.add(verification)
+    await db.flush()
+    return verification, txt_value
+
+
+async def complete_workspace_verification(
+    db: AsyncSession,
+    agent_id: str,
+    verification_id: str,
+) -> Verification:
+    """Complete workspace verification by confirming DNS record.
+
+    Uses the same DNS lookup logic and DOMAIN_VERIFICATION_AUTO flag
+    as domain verification.
+    """
+    verification = await _get_verification(db, verification_id, agent_id, "workspace")
+    _check_pending(verification)
+
+    domain = verification.identifier
+    expected_value = verification.verification_code
+
+    if not settings.DOMAIN_VERIFICATION_AUTO:
+        # Production: perform actual DNS TXT lookup
+        dns_verified = await _check_dns_txt_record(
+            f"_seabay-workspace.{domain}", expected_value,
+        )
+
+        if not dns_verified:
+            raise InvalidRequestError(
+                "DNS record not found. Please add the TXT record "
+                f"'_seabay-workspace.{domain}' with value '{expected_value}' and retry."
+            )
+
+    verification.status = "verified"
+    verification.verified_at = datetime.now(timezone.utc)
+
+    # Update agent verification level
+    result = await db.execute(select(Agent).where(Agent.id == agent_id))
+    agent = result.scalar_one_or_none()
+    if agent:
+        await _update_agent_verification_level(db, agent)
+
+    await db.flush()
+    return verification
 
 
 async def revoke_verification(
@@ -233,6 +315,70 @@ async def compute_highest_verification(
             continue
 
     return highest_level
+
+
+# ── DNS Lookup ──
+
+async def _check_dns_txt_record(record_name: str, expected_value: str) -> bool:
+    """Check if a DNS TXT record exists with the expected value.
+
+    Tries dns.resolver first, falls back to subprocess dig/nslookup.
+    """
+    # Try dns.resolver (if dnspython is installed)
+    try:
+        import dns.resolver
+
+        def _resolve():
+            try:
+                answers = dns.resolver.resolve(record_name, "TXT")
+                for rdata in answers:
+                    for txt_string in rdata.strings:
+                        if txt_string.decode("utf-8").strip() == expected_value:
+                            return True
+            except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers):
+                pass
+            except Exception as e:
+                logger.warning("dns.resolver error for %s: %s", record_name, e)
+            return False
+
+        return await asyncio.get_event_loop().run_in_executor(None, _resolve)
+    except ImportError:
+        logger.info("dnspython not installed, falling back to subprocess dig")
+
+    # Fallback: use dig command
+    try:
+        result = await asyncio.create_subprocess_exec(
+            "dig", "+short", "TXT", record_name,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, _ = await asyncio.wait_for(result.communicate(), timeout=10)
+        output = stdout.decode("utf-8").strip()
+        # dig returns TXT values in quotes: "seabay-verify=xxx"
+        for line in output.split("\n"):
+            cleaned = line.strip().strip('"')
+            if cleaned == expected_value:
+                return True
+    except FileNotFoundError:
+        logger.info("dig not found, trying nslookup")
+    except Exception as e:
+        logger.warning("dig subprocess error: %s", e)
+
+    # Final fallback: nslookup
+    try:
+        result = await asyncio.create_subprocess_exec(
+            "nslookup", "-type=TXT", record_name,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, _ = await asyncio.wait_for(result.communicate(), timeout=10)
+        output = stdout.decode("utf-8")
+        if expected_value in output:
+            return True
+    except Exception as e:
+        logger.warning("nslookup subprocess error: %s", e)
+
+    return False
 
 
 # ── Internal Helpers ──

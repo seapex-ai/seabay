@@ -51,5 +51,8 @@ logs/
 htmlcov/
 .pytest_cache/
 
+# Ruff
+.ruff_cache/
+
 # Alembic
 alembic/versions/*.pyc

@@ -265,6 +265,131 @@ def demo(api_url: str):
 
 
 @cli.command()
+@click.argument("slug_or_id")
+def connect(slug_or_id: str):
+    """Connect to an agent by slug or ID — creates a relationship import."""
+    config = _load_config()
+    api_url = config.get("api_url", DEFAULT_API_URL)
+
+    click.echo(f"Connecting to agent '{slug_or_id}'...")
+
+    try:
+        # First, fetch agent info via the connect endpoint
+        resp = httpx.post(
+            f"{api_url}/agents/connect/{slug_or_id}",
+            timeout=10,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        agent_info = data["agent"]
+
+        click.echo(f"\nAgent: {agent_info['display_name']} (@{agent_info['slug']})")
+        click.echo(f"  ID:           {agent_info['id']}")
+        click.echo(f"  Type:         {agent_info['agent_type']}")
+        click.echo(f"  Verification: {agent_info['verification_level']}")
+
+        # Create a relationship request (imported_contact origin)
+        rel_resp = httpx.post(
+            f"{api_url}/relationships/request",
+            headers=_headers(config),
+            json={
+                "to_agent_id": agent_info["id"],
+                "origin_type": "imported_contact",
+                "note": f"Connected via CLI (slug: {slug_or_id})",
+            },
+            timeout=10,
+        )
+        rel_resp.raise_for_status()
+        rel_data = rel_resp.json()
+
+        click.echo(f"\nRelationship created:")
+        click.echo(f"  Edge ID:  {rel_data.get('id', 'N/A')}")
+        click.echo(f"  Strength: {rel_data.get('strength', 'new')}")
+        click.echo(f"\nConnect options:")
+        for key, val in data.get("connect_options", {}).items():
+            click.echo(f"  {key}: {val}")
+        click.echo()
+
+    except httpx.HTTPStatusError as e:
+        click.echo(f"Error: {e.response.text}", err=True)
+        sys.exit(1)
+    except httpx.ConnectError:
+        click.echo(f"Error: Cannot connect to {api_url}", err=True)
+        sys.exit(1)
+
+
+@cli.command(name="verify-demo")
+def verify_demo():
+    """Run a quick verification demo: start email verification, complete with dev code, show status."""
+    config = _load_config()
+    api_url = config.get("api_url", DEFAULT_API_URL)
+    headers = _headers(config)
+
+    click.echo("Running verification demo...\n")
+
+    try:
+        # Step 1: Start email verification
+        demo_email = f"demo-{config.get('slug', 'agent')}@seabay.dev"
+        click.echo(f"Step 1: Starting email verification for {demo_email}...")
+
+        start_resp = httpx.post(
+            f"{api_url}/verifications/email/start",
+            headers=headers,
+            params={"email": demo_email},
+            timeout=10,
+        )
+        start_resp.raise_for_status()
+        start_data = start_resp.json()
+
+        verification_id = start_data["verification_id"]
+        dev_code = start_data.get("_dev_code", "")
+        click.echo(f"  Verification ID: {verification_id}")
+        click.echo(f"  Status: {start_data['status']}")
+        click.echo(f"  Dev code: {dev_code}")
+
+        # Step 2: Complete email verification with the dev code
+        click.echo(f"\nStep 2: Completing verification with dev code...")
+
+        complete_resp = httpx.post(
+            f"{api_url}/verifications/email/complete",
+            headers=headers,
+            params={"verification_id": verification_id, "code": dev_code},
+            timeout=10,
+        )
+        complete_resp.raise_for_status()
+        complete_data = complete_resp.json()
+        click.echo(f"  Status: {complete_data['status']}")
+
+        # Step 3: Show updated verification status
+        click.echo(f"\nStep 3: Fetching verification status...")
+
+        status_resp = httpx.get(
+            f"{api_url}/verifications/my",
+            headers=headers,
+            timeout=10,
+        )
+        status_resp.raise_for_status()
+        status_data = status_resp.json()
+
+        verifications = status_data.get("data", [])
+        if verifications:
+            click.echo(f"\n  Verifications ({len(verifications)}):")
+            for v in verifications:
+                click.echo(f"    [{v['method']}] {v['status']} — {v.get('identifier', 'N/A')}")
+        else:
+            click.echo("  No verifications found.")
+
+        click.echo("\nVerification demo complete!")
+
+    except httpx.HTTPStatusError as e:
+        click.echo(f"Error: {e.response.text}", err=True)
+        sys.exit(1)
+    except httpx.ConnectError:
+        click.echo(f"Error: Cannot connect to {api_url}", err=True)
+        sys.exit(1)
+
+
+@cli.command()
 @click.option("--api-url", default=DEFAULT_API_URL, help="Seabay API URL")
 def doctor(api_url: str):
     """Check Seabay development environment health."""

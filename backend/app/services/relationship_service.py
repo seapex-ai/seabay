@@ -239,7 +239,10 @@ async def derive_strength(
             # Check last interaction within 30 days
             if edge.last_interaction_at:
                 cutoff = datetime.now(timezone.utc) - timedelta(days=30)
-                if str(edge.last_interaction_at) > str(cutoff):
+                last_at = edge.last_interaction_at
+                if isinstance(last_at, str):
+                    last_at = datetime.fromisoformat(last_at.replace("Z", "+00:00"))
+                if last_at > cutoff:
                     return "frequent"
 
     # Check for trusted
