@@ -1,4 +1,4 @@
-"""Agent registration, retrieval, update, search, delete, export — 10 endpoints.
+"""Agent registration, retrieval, update, search, delete, export, connect, lookup.
 
 Refactored to use agent_service and search_service.
 """
@@ -6,12 +6,14 @@ Refactored to use agent_service and search_service.
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_agent
-from app.core.exceptions import InvalidRequestError
+from app.core.exceptions import InvalidRequestError, NotFoundError
 from app.database import get_db
 from app.models.agent import Agent
+from app.models.verification import Verification
 from app.schemas.agent import (
     AgentRegisterRequest,
     AgentRegisterResponse,
@@ -142,6 +144,77 @@ async def search_agents(
         "data": results,
         "next_cursor": next_cursor,
         "has_more": has_more,
+    }
+
+
+@router.get("/lookup")
+async def lookup_agent_by_email(
+    email: str = Query(..., description="Verified email to look up"),
+    current_agent: Agent = Depends(get_current_agent),
+    db: AsyncSession = Depends(get_db),
+):
+    """GET /v1/agents/lookup?email=xxx — Look up agent by verified email.
+
+    Searches the verifications table for a verified email match
+    and returns the agent's public card.
+    """
+    result = await db.execute(
+        select(Verification).where(
+            Verification.method == "email",
+            Verification.status == "verified",
+            Verification.identifier == email,
+        )
+    )
+    verification = result.scalar_one_or_none()
+    if not verification:
+        raise NotFoundError("Agent with verified email")
+
+    agent = await agent_service.get_agent(db, verification.agent_id)
+    return await visibility_service.get_agent_card_for_viewer(db, agent, viewer=current_agent)
+
+
+@router.post("/connect/{agent_id_or_slug}", status_code=200)
+async def connect_agent(
+    agent_id_or_slug: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """POST /v1/agents/connect/{agent_id_or_slug} — Deeplink/QR connect endpoint.
+
+    Accepts an agent ID or slug and returns the agent's public profile
+    plus connection options. No authentication required — designed for
+    QR code / deeplink scanning flows.
+    """
+    # Try by ID first, then by slug
+    agent = None
+    try:
+        agent = await agent_service.get_agent(db, agent_id_or_slug)
+    except NotFoundError:
+        try:
+            agent = await agent_service.get_agent_by_slug(db, agent_id_or_slug)
+        except NotFoundError:
+            raise NotFoundError("Agent")
+
+    if agent.status in ("suspended", "banned"):
+        raise NotFoundError("Agent")
+
+    # Build public profile card
+    profile_data = await visibility_service.get_public_profile(db, agent)
+
+    return {
+        "agent": {
+            "id": agent.id,
+            "slug": agent.slug,
+            "display_name": agent.display_name,
+            "agent_type": agent.agent_type,
+            "verification_level": agent.verification_level,
+            "status": agent.status,
+            "profile": profile_data,
+        },
+        "connect_options": {
+            "deeplink": f"seabay://connect/{agent.slug}",
+            "web_url": f"https://seabay.ai/agents/{agent.slug}",
+            "api_endpoint": f"/v1/relationships/request",
+        },
     }
 
 

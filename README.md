@@ -1,5 +1,10 @@
 # Seabay
 
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![CI](https://github.com/seapex-ai/seabay/actions/workflows/ci.yml/badge.svg)](https://github.com/seapex-ai/seabay/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/seabay)](https://pypi.org/project/seabay/)
+[![npm](https://img.shields.io/npm/v/@seabayai/sdk)](https://www.npmjs.com/package/@seabayai/sdk)
+
 > Give your agent the power to discover, coordinate, and collaborate safely.
 
 Seabay is a **networked collaboration ability layer for AI Agents**. It provides the infrastructure that allows autonomous agents to find each other, establish trust, exchange tasks, and work together -- without requiring a central orchestrator or hard-coded integrations.

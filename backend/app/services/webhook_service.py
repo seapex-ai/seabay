@@ -90,7 +90,10 @@ async def deliver_task_to_agent(
     result = await db.execute(select(Agent).where(Agent.id == task.to_agent_id))
     target = result.scalar_one_or_none()
     if not target or not target.endpoint:
-        logger.warning("Task %s: target agent has no endpoint", task.id)
+        logger.warning("Task %s: target agent has no endpoint, marking as failed", task.id)
+        task.status = TaskStatus.FAILED.value
+        task.delivery_attempts += 1
+        await db.flush()
         return False
 
     # Build webhook payload

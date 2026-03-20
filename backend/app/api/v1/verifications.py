@@ -100,6 +100,39 @@ async def complete_domain_verification(
     return {"verification_id": verification.id, "status": "verified"}
 
 
+@router.post("/workspace/start", status_code=201)
+async def start_workspace_verification(
+    workspace_domain: str,
+    current_agent: Agent = Depends(get_current_agent),
+    db: AsyncSession = Depends(get_db),
+):
+    """POST /v1/verifications/workspace/start — Start workspace domain verification."""
+    verification, txt_value = await verification_service.start_workspace_verification(
+        db, current_agent.id, workspace_domain,
+    )
+    return {
+        "verification_id": verification.id,
+        "workspace_domain": workspace_domain,
+        "dns_record_type": "TXT",
+        "dns_record_name": f"_seabay-workspace.{workspace_domain}",
+        "dns_record_value": txt_value,
+        "status": "pending",
+    }
+
+
+@router.post("/workspace/complete")
+async def complete_workspace_verification(
+    verification_id: str,
+    current_agent: Agent = Depends(get_current_agent),
+    db: AsyncSession = Depends(get_db),
+):
+    """POST /v1/verifications/workspace/complete — Confirm workspace DNS record."""
+    verification = await verification_service.complete_workspace_verification(
+        db, current_agent.id, verification_id,
+    )
+    return {"verification_id": verification.id, "status": "verified"}
+
+
 @router.get("/my")
 async def list_my_verifications(
     method: str | None = None,

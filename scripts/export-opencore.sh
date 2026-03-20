@@ -26,7 +26,8 @@ mkdir -p "${OUTPUT}"
 for f in LICENSE NOTICE README.md README.zh-CN.md CHANGELOG.md ROADMAP.md \
          SECURITY.md CONTRIBUTING.md GOVERNANCE.md CODE_OF_CONDUCT.md TRADEMARK_NOTICE.md \
          sbom.json docker-compose.yml docker-compose.prod.yml .gitignore \
-         .opencore-manifest.yml; do
+         .opencore-manifest.yml .editorconfig \
+         VISION.md ARCHITECTURE.md REGION_POLICY.md SUPPORT.md RELEASING.md; do
   [ -f "${REPO_ROOT}/${f}" ] && cp "${REPO_ROOT}/${f}" "${OUTPUT}/"
 done
 
@@ -101,6 +102,7 @@ API_WHITELIST=(
   public.py
   events.py
   reports.py
+  match.py
 )
 # admin.py is NEVER copied — it is hosted_private
 
@@ -152,6 +154,7 @@ SERVICES_REFERENCE=(
   shadow_throttle_service.py
   budget_service.py
   new_account_service.py
+  match_service.py
 )
 
 for f in "${SERVICES_OPEN[@]}" "${SERVICES_REFERENCE[@]}"; do

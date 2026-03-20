@@ -30,6 +30,26 @@ from app.models.task import Task
 from app.services import relationship_service as rel_service
 from app.services.task_service import run_dlp_scan
 
+# Hosted weight overrides (graceful fallback to defaults)
+try:
+    from app.hosted.weights import MATCHING_WEIGHTS as _HOSTED_WEIGHTS
+except ImportError:
+    _HOSTED_WEIGHTS = None
+
+# Default matching weights (open-core)
+_DEFAULT_WEIGHTS = {
+    "skills_match": 30,
+    "languages_match": 15,
+    "location_match": 10,
+    "verification_level": 10,
+    "service_type_bonus": 5,
+    "relationship_bonus": 15,
+    "circle_bonus": 10,
+    "availability_bonus": 5,
+}
+
+WEIGHTS = _HOSTED_WEIGHTS if _HOSTED_WEIGHTS is not None else _DEFAULT_WEIGHTS
+
 
 async def get_intent(db: AsyncSession, intent_id: str) -> Intent:
     """Get intent by ID or raise NotFoundError."""
@@ -148,11 +168,11 @@ async def find_matches(
         score = 0.0
         reasons = []
 
-        # Skill match (30 pts each) — hard filter when skills are specified
+        # Skill match — hard filter when skills are specified
         if req_skills and profile.skills:
             overlap = set(req_skills) & set(profile.skills)
             if overlap:
-                score += len(overlap) * 30
+                score += len(overlap) * WEIGHTS.get("skills_match", 30)
                 reasons.append(f"Skills match: {', '.join(sorted(overlap))}")
             else:
                 # Hard filter: skip agents with zero skill overlap
@@ -176,38 +196,39 @@ async def find_matches(
                 score += len(offer_overlap) * 15
                 reasons.append(f"Can offer: {', '.join(sorted(offer_overlap))}")
 
-        # Language match (15 pts each)
+        # Language match
         if req_languages and profile.languages:
             lang_overlap = set(req_languages) & set(profile.languages)
             if lang_overlap:
-                score += len(lang_overlap) * 15
+                score += len(lang_overlap) * WEIGHTS.get("languages_match", 15)
                 reasons.append(f"Languages: {', '.join(sorted(lang_overlap))}")
 
-        # Location match (10 pts)
+        # Location match
         if req_location:
+            loc_pts = WEIGHTS.get("location_match", 10)
             if profile.location_country == req_location:
-                score += 10
+                score += loc_pts
                 reasons.append(f"Location: {profile.location_country}")
             elif profile.location_city and req_location.lower() == profile.location_city.lower():
-                score += 10
+                score += loc_pts
                 reasons.append(f"Location: {profile.location_city}")
 
-        # Verification bonus (10 pts)
+        # Verification bonus
         if agent.verification_level != "none":
-            score += 10
+            score += WEIGHTS.get("verification_level", 10)
             reasons.append(f"Verified: {agent.verification_level}")
 
-        # Service agent type bonus (5 pts)
+        # Service agent type bonus
         if agent.agent_type == "service":
-            score += 5
+            score += WEIGHTS.get("service_type_bonus", 5)
             if not any("service" in r.lower() for r in reasons):
                 reasons.append("Service agent")
 
-        # Relationship bonus (8 pts)
+        # Relationship bonus
         edge = await _get_edge_fast(db, requester.id, agent.id)
         if edge and not edge.is_blocked:
             if edge.strength in ("trusted", "frequent"):
-                score += 15
+                score += WEIGHTS.get("relationship_bonus", 15)
                 reasons.append(f"Trusted relationship ({edge.strength})")
             elif edge.strength == "acquaintance":
                 score += 8

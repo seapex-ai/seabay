@@ -17,7 +17,7 @@ jobs:
       - name: Install ruff
         run: pip install ruff
       - name: Lint public Python surfaces
-        run: ruff check backend adapters examples
+        run: ruff check backend adapters examples apps agents shell-cli --extend-exclude "**/node_modules"
 
   test-unit:
     runs-on: ubuntu-latest
@@ -94,3 +94,38 @@ jobs:
         run: |
           docker run --rm --entrypoint="" seabay-api:${{ github.sha }} \
             python -c "from app.main import app; print('OK: app imports successfully')"
+
+  # ── MCP Edge syntax check ──
+  mcp-edge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check MCP Edge
+        run: python -m py_compile apps/mcp-edge/main.py
+      - name: Syntax check all MCP Edge Python
+        run: find apps/mcp-edge -name "*.py" -exec python -m py_compile {} +
+
+  # ── Shell CLI syntax check ──
+  shell-cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check Shell CLI
+        run: find shell-cli -name "*.py" -exec python -m py_compile {} +
+
+  # ── Seed Agents syntax check ──
+  seed-agents:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax check all agents
+        run: find agents -name "*.py" -exec python -m py_compile {} +
