@@ -1,8 +1,16 @@
-"""Tests for circle service — creation, membership, dissolution logic."""
+"""Tests for circle service — creation, membership, dissolution logic.
+
+Enhanced with mock-based tests for actual service methods.
+"""
 
 from __future__ import annotations
 
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
 from app.config import settings
+from app.core.exceptions import ConflictError, ForbiddenError, InvalidRequestError, NotFoundError
 
 
 class TestCircleConstraints:
@@ -114,3 +122,217 @@ class TestCircleOwnershipTransfer:
         old_role = "owner"
         new_role = "admin"
         assert old_role != new_role
+
+
+# ── Enhanced mock-based service tests ──
+
+
+def _mock_db_scalar(return_value):
+    result = MagicMock()
+    result.scalar_one_or_none.return_value = return_value
+    return result
+
+
+def _make_agent(agent_id: str) -> MagicMock:
+    agent = MagicMock()
+    agent.id = agent_id
+    return agent
+
+
+def _make_circle(
+    circle_id: str = "circle_001",
+    owner_id: str = "agt_owner",
+    max_members: int = 30,
+    member_count: int = 1,
+    join_mode: str = "invite_only",
+    invite_link_token: str = "valid_token",
+    is_active: bool = True,
+) -> MagicMock:
+    circle = MagicMock()
+    circle.id = circle_id
+    circle.owner_agent_id = owner_id
+    circle.max_members = max_members
+    circle.member_count = member_count
+    circle.join_mode = join_mode
+    circle.invite_link_token = invite_link_token
+    circle.is_active = is_active
+    return circle
+
+
+class TestCircleServiceCreate:
+    """Test circle_service.create_circle with mocks."""
+
+    @pytest.mark.asyncio
+    async def test_create_circle_sets_owner_as_member(self):
+        """Creating a circle should add owner as first member."""
+        from app.services.circle_service import create_circle
+
+        db = AsyncMock()
+        db.add = MagicMock()
+        db.flush = AsyncMock()
+        owner = _make_agent("agt_owner")
+
+        circle = await create_circle(db, owner, "Test Circle")
+        assert circle.name == "Test Circle"
+        assert circle.owner_agent_id == "agt_owner"
+        assert circle.member_count == 1
+        # db.add called for both circle and membership
+        assert db.add.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_create_circle_caps_max_members(self):
+        """max_members should be capped at CIRCLE_MAX_MEMBERS."""
+        from app.services.circle_service import create_circle
+
+        db = AsyncMock()
+        db.add = MagicMock()
+        db.flush = AsyncMock()
+        owner = _make_agent("agt_owner")
+
+        circle = await create_circle(db, owner, "Big Circle", max_members=100)
+        assert circle.max_members == 30
+
+
+class TestCircleServiceJoin:
+    """Test circle_service.join_circle with mocks."""
+
+    @pytest.mark.asyncio
+    async def test_already_member_raises_conflict(self):
+        """Joining a circle you're already in raises ConflictError."""
+        from app.services.circle_service import join_circle
+
+        circle = _make_circle()
+        agent = _make_agent("agt_member")
+
+        existing_membership = MagicMock()
+        db = AsyncMock()
+        db.execute = AsyncMock(return_value=_mock_db_scalar(existing_membership))
+
+        with pytest.raises(ConflictError, match="Already a member"):
+            await join_circle(db, circle, agent, "valid_token")
+
+    @pytest.mark.asyncio
+    async def test_full_circle_raises_error(self):
+        """Joining a full circle raises InvalidRequestError."""
+        from app.services.circle_service import join_circle
+
+        circle = _make_circle(member_count=30, max_members=30)
+        agent = _make_agent("agt_new")
+
+        db = AsyncMock()
+        db.execute = AsyncMock(return_value=_mock_db_scalar(None))
+
+        with pytest.raises(InvalidRequestError, match="Circle is full"):
+            await join_circle(db, circle, agent, "valid_token")
+
+    @pytest.mark.asyncio
+    async def test_invalid_token_raises_forbidden(self):
+        """Invalid invite token raises ForbiddenError."""
+        from app.services.circle_service import join_circle
+
+        circle = _make_circle()
+        agent = _make_agent("agt_new")
+
+        db = AsyncMock()
+        db.execute = AsyncMock(return_value=_mock_db_scalar(None))
+
+        with pytest.raises(ForbiddenError, match="Invalid invite token"):
+            await join_circle(db, circle, agent, "wrong_token")
+
+    @pytest.mark.asyncio
+    async def test_request_approve_redirects(self):
+        """request_approve circles should direct to join-requests."""
+        from app.services.circle_service import join_circle
+
+        circle = _make_circle(join_mode="request_approve")
+        agent = _make_agent("agt_new")
+
+        db = AsyncMock()
+        db.execute = AsyncMock(return_value=_mock_db_scalar(None))
+
+        with pytest.raises(InvalidRequestError, match="join-requests"):
+            await join_circle(db, circle, agent)
+
+
+class TestCircleServiceLeave:
+    """Test circle_service.leave_circle with mocks."""
+
+    @pytest.mark.asyncio
+    async def test_owner_cannot_leave(self):
+        """Circle owner cannot leave."""
+        from app.services.circle_service import leave_circle
+
+        circle = _make_circle(owner_id="agt_owner")
+        owner = _make_agent("agt_owner")
+        db = AsyncMock()
+
+        with pytest.raises(InvalidRequestError, match="Owner cannot leave"):
+            await leave_circle(db, circle, owner)
+
+
+class TestCircleServiceDissolve:
+    """Test circle_service.dissolve_circle with mocks."""
+
+    @pytest.mark.asyncio
+    async def test_non_owner_cannot_dissolve(self):
+        """Non-owner attempting to dissolve raises ForbiddenError."""
+        from app.services.circle_service import dissolve_circle
+
+        circle = _make_circle(owner_id="agt_owner")
+        non_owner = _make_agent("agt_member")
+        db = AsyncMock()
+
+        with pytest.raises(ForbiddenError, match="Only the circle owner"):
+            await dissolve_circle(db, circle, non_owner)
+
+
+class TestCircleServiceTransfer:
+    """Test circle_service.transfer_ownership with mocks."""
+
+    @pytest.mark.asyncio
+    async def test_non_owner_cannot_transfer(self):
+        """Non-owner cannot transfer ownership."""
+        from app.services.circle_service import transfer_ownership
+
+        circle = _make_circle(owner_id="agt_owner")
+        non_owner = _make_agent("agt_member")
+        db = AsyncMock()
+
+        with pytest.raises(ForbiddenError, match="Only the circle owner"):
+            await transfer_ownership(db, circle, non_owner, "agt_new_owner")
+
+    @pytest.mark.asyncio
+    async def test_transfer_to_non_member_fails(self):
+        """Transfer to non-member raises InvalidRequestError."""
+        from app.services.circle_service import transfer_ownership
+
+        circle = _make_circle(owner_id="agt_owner")
+        owner = _make_agent("agt_owner")
+        db = AsyncMock()
+        db.execute = AsyncMock(return_value=_mock_db_scalar(None))
+
+        with pytest.raises(InvalidRequestError, match="New owner must be a circle member"):
+            await transfer_ownership(db, circle, owner, "agt_nonmember")
+
+
+class TestCircleEnums:
+    """Test circle-related enumerations are complete."""
+
+    def test_join_modes(self):
+        from app.models.enums import CircleJoinMode
+        values = {m.value for m in CircleJoinMode}
+        assert values == {"invite_only", "request_approve", "open_link"}
+
+    def test_contact_modes(self):
+        from app.models.enums import CircleContactMode
+        values = {m.value for m in CircleContactMode}
+        assert values == {"directory_only", "request_only", "direct_allowed"}
+
+    def test_roles(self):
+        from app.models.enums import CircleRole
+        values = {r.value for r in CircleRole}
+        assert values == {"owner", "admin", "member"}
+
+    def test_join_request_statuses(self):
+        from app.models.enums import CircleJoinRequestStatus
+        assert len(CircleJoinRequestStatus) >= 4

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Dict
 
-from sqlalchemy import DateTime, Integer, String, Text, func
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -13,7 +13,7 @@ class Intent(Base):
     __tablename__ = "intents"
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True)
-    from_agent_id: Mapped[str] = mapped_column(String(32), nullable=False)
+    from_agent_id: Mapped[str] = mapped_column(String(32), ForeignKey("agents.id"), nullable=False)
 
     category: Mapped[str] = mapped_column(String(20), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)

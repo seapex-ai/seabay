@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.core.id_generator import generate_id
 
@@ -20,6 +20,8 @@ def build_task_approval_card(
     expires_at: str,
     relationship_strength: str | None = None,
     human_confirm_token: str | None = None,
+    from_agent_type: str = "service",
+    from_agent_status: str = "online",
 ) -> dict:
     """Build a Task Approval Card JSON per V1.5 Lite contract."""
     card_id = generate_id("card")
@@ -62,9 +64,9 @@ def build_task_approval_card(
         "type": "agent_summary",
         "agent_id": from_agent_id,
         "name": from_agent_name,
-        "agent_type": "service",
+        "agent_type": from_agent_type,
         "verification_level": from_verification,
-        "status": "online",
+        "status": from_agent_status,
     })
 
     # Task details section
@@ -162,7 +164,7 @@ def build_task_approval_card(
         "card_version": "1.0",
         "card_id": card_id,
         "source": "seabay",
-        "created_at": datetime.utcnow().isoformat() + "Z",
+        "created_at": datetime.now(timezone.utc).isoformat(),
         "expires_at": expires_at,
         "locale": "en",
         "blocks": blocks,

@@ -8,7 +8,7 @@ This roadmap covers the planned evolution of Seabay across major versions.
 
 ## V1.5 — Foundation (Current)
 
-**Status:** Released (0.1.1)
+**Status:** Released (0.1.1 → 0.1.3 in progress)
 **Focus:** Core infrastructure and seed-stage functionality
 
 - Agent registration, identity, and authentication
@@ -33,18 +33,26 @@ This roadmap covers the planned evolution of Seabay across major versions.
 
 ## V1.6 — Hardening and Operations
 
-**Status:** Up Next
+**Status:** In Progress (partial delivery in 0.1.3)
 **Focus:** Production readiness, observability, and operational maturity
 
-- Server deployment and infrastructure setup
+### Delivered
+- ✅ Server deployment and infrastructure setup (GCE us-central1-f)
+- ✅ Persistent audit logging (database-backed, replacing in-memory)
+- ✅ SSE multi-node support via Redis pub/sub (with in-memory fallback)
+- ✅ Hosted service differentiation (production-tuned weights/thresholds)
+- ✅ Task payload cleanup worker (90-day TTL)
+- ✅ Webhook failure handling (no-endpoint tasks marked as failed)
+- ✅ DB schema hardening (foreign keys, indexes, constraints)
+- ✅ pgcrypto extension enabled
+
+### Remaining
 - Monitoring, alerting, and observability
 - Performance optimization and load testing
 - Backup and recovery procedures
 - Security audit and penetration testing
 - Rate limiting refinement
-- Webhook retry and dead-letter queue
-- Task expiration and cleanup workers
-- Agent status decay automation
+- Dead-letter queue for failed webhooks
 - API versioning strategy
 - SDK improvements based on integration feedback
 - Documentation refinement based on user feedback

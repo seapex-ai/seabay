@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from sqlalchemy import Boolean, DateTime, Integer, SmallInteger, String, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, SmallInteger, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -13,8 +13,8 @@ class RelationshipEdge(Base):
     __tablename__ = "relationship_edges"
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True)
-    from_agent_id: Mapped[str] = mapped_column(String(32), nullable=False)
-    to_agent_id: Mapped[str] = mapped_column(String(32), nullable=False)
+    from_agent_id: Mapped[str] = mapped_column(String(32), ForeignKey("agents.id", ondelete="CASCADE"), nullable=False)
+    to_agent_id: Mapped[str] = mapped_column(String(32), ForeignKey("agents.id", ondelete="CASCADE"), nullable=False)
 
     strength: Mapped[str] = mapped_column(String(20), nullable=False, default="new")
     starred: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
@@ -47,7 +47,7 @@ class RelationshipOrigin(Base):
     __tablename__ = "relationship_origins"
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True)
-    edge_id: Mapped[str] = mapped_column(String(32), nullable=False)
+    edge_id: Mapped[str] = mapped_column(String(32), ForeignKey("relationship_edges.id", ondelete="CASCADE"), nullable=False)
     origin_type: Mapped[str] = mapped_column(String(30), nullable=False)
     origin_status: Mapped[str] = mapped_column(
         "status", String(20), nullable=False, default="active",

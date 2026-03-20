@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.core.id_generator import generate_id
 
@@ -46,7 +46,7 @@ def build_match_result_card(
             "name": match["display_name"],
             "agent_type": match.get("agent_type", "service"),
             "verification_level": match.get("verification_level", "none"),
-            "status": "online",
+            "status": match.get("status", "online"),
         })
 
         blocks.append({
@@ -84,7 +84,7 @@ def build_match_result_card(
         "card_version": "1.0",
         "card_id": card_id,
         "source": "seabay",
-        "created_at": datetime.utcnow().isoformat() + "Z",
+        "created_at": datetime.now(timezone.utc).isoformat(),
         "expires_at": expires_at,
         "locale": "en",
         "blocks": blocks,
