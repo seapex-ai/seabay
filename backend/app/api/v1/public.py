@@ -37,10 +37,10 @@ async def get_public_stats(
     )
     service_agents = service_result.scalar() or 0
 
-    # Count agents currently online (status = 'active')
+    # Count agents currently online (status = 'online' or 'active')
     online_result = await db.execute(
         select(func.count()).where(
-            Agent.status == "active",
+            Agent.status.in_(["online", "active"]),
             Agent.visibility_scope == "public",
         )
     )
