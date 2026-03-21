@@ -179,15 +179,22 @@ def build_summary_text(
 
 def _match_to_candidate(m: dict) -> dict:
     """Transform an intent_service match dict to MCP candidate format."""
+    trust = m.get("trust_summary", {})
+    if not trust:
+        trust = {
+            "trust_tier": m.get("trust_tier"),
+            "verification_level": m.get("verification_level", "none"),
+            "badges": m.get("badges", []),
+        }
     return {
         "agent_id": m.get("agent_id", ""),
         "display_name": m.get("display_name", ""),
-        "description": None,  # Not exposed in intent match, kept card-ready
-        "location": None,  # Derived from reasons if present
-        "skills": [],  # Could parse from reasons, left for profile fetch
+        "description": None,
+        "location": None,
+        "skills": [],
         "verification_level": m.get("verification_level", "none"),
         "last_active": None,
-        "trust_summary": {},
+        "trust_summary": trust,
         "why_matched": m.get("reasons", []),
         "match_score": m.get("match_score", 0.0),
     }
