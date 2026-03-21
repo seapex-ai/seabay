@@ -160,7 +160,18 @@ async def find_matches(
     req_languages = reqs.get("languages", []) or reqs.get("language", [])
     if isinstance(req_languages, str):
         req_languages = [req_languages]
-    req_location = reqs.get("location_country") or reqs.get("location")
+    # Parse location: supports "Sydney, AU", "AU", "Sydney" formats
+    raw_location = reqs.get("location_country") or reqs.get("location") or ""
+    req_location_country = None
+    req_location_city = None
+    if "," in raw_location:
+        parts = [p.strip() for p in raw_location.split(",")]
+        req_location_city = parts[0]
+        req_location_country = parts[1] if len(parts) > 1 else None
+    elif len(raw_location) == 2:
+        req_location_country = raw_location.upper()
+    else:
+        req_location_city = raw_location
 
     for row in candidates:
         agent = row.Agent
@@ -203,14 +214,28 @@ async def find_matches(
                 score += len(lang_overlap) * WEIGHTS.get("languages_match", 15)
                 reasons.append(f"Languages: {', '.join(sorted(lang_overlap))}")
 
-        # Location match
-        if req_location:
+        # Location match (city > country)
+        if req_location_city or req_location_country:
             loc_pts = WEIGHTS.get("location_match", 10)
-            if profile.location_country == req_location:
+            city_match = (
+                req_location_city
+                and profile.location_city
+                and req_location_city.lower() == profile.location_city.lower()
+            )
+            country_match = (
+                req_location_country
+                and profile.location_country
+                and req_location_country.upper() == profile.location_country.upper()
+            )
+            if city_match and country_match:
+                score += loc_pts * 2  # exact city+country
+                reasons.append(f"Location: {profile.location_city}, {profile.location_country}")
+            elif city_match:
                 score += loc_pts
+                reasons.append(f"Location: {profile.location_city}")
+            elif country_match:
+                score += loc_pts * 0.5  # country only = weaker match
                 reasons.append(f"Location: {profile.location_country}")
-            elif profile.location_city and req_location.lower() == profile.location_city.lower():
-                score += loc_pts
                 reasons.append(f"Location: {profile.location_city}")
 
         # Verification bonus

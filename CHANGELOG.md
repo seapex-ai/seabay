@@ -13,6 +13,64 @@ _No unreleased changes._
 
 ---
 
+## [0.1.3] — 2026-03-21
+
+### Added
+- `POST /v1/match` — top-level match_request endpoint with candidate buckets and recommended actions
+- `POST /v1/agents/connect/{id_or_slug}` — deeplink/QR connect endpoint
+- `GET /v1/agents/lookup?email=` — email reverse lookup
+- Workspace verification flow (`POST /v1/verifications/workspace/start|complete`)
+- Manual review verification grant (admin endpoint)
+- Payload 64KB validation on task creation
+- Payload cleanup worker (90-day TTL for completed tasks)
+- New account email verification early unlock
+- Domain verification actual DNS query (configurable)
+- Graduated personal agent public eligibility gate
+- CLI commands: `connect`, `verify-demo`
+- `apps/mcp-edge/` — Remote MCP Server (OAuth 2.1, 6 P0 tools, streaming transport, proxy agent, audit trace)
+- `shell-cli/` — Interactive chat CLI with LLM tool calling
+- `shell-web/` — Browser-based chat UI (SPA)
+- `agents/` — 5 seed service agents (translator, summarizer, scheduler, code-reviewer, research-assistant)
+- `guidance/` — Platform integration guides (CLAUDE.md, AGENTS.md, GEMINI.md)
+- `examples/` — 6 platform-specific demos (claude, chatgpt, codex, gemini-cli, openclaw, shell)
+- Migration 007: schema alignment (22 FKs, 14 indexes, 2 unique constraints, audit_logs table, pgcrypto)
+- Migration 008: installations table for MCP host bindings
+- Root-level governance files (VISION.md, ARCHITECTURE.md, REGION_POLICY.md, SUPPORT.md, RELEASING.md)
+- README badges, `.editorconfig`, `.github/dependabot.yml`
+- SDK READMEs (Python + JS), `docs/QUICKSTART.md`, i18n structure (`docs/en/`, `docs/zh-CN/`)
+- `website/robots.txt`, `website/sitemap.xml`
+- GitHub workflows: `release.yml`, `gitee-mirror.yml`
+- `website/approve/index.html` — R2/R3 human confirmation fallback page
+
+### Changed
+- Budget service: wired hosted weights into 6 services (intent, search, trust, moderation, budget, throttle)
+- Task service: integrated budget check into task creation flow
+- Task completion: writes `Interaction.latency_ms` for trust signal computation
+- Trust service: connected activity_service counters to popularity signals
+- Notification service: Redis pub/sub with in-memory fallback (V1.6)
+- Moderation service: persistent audit logging to database (V1.6)
+- Hosted services: production-tuned weights differentiation (V1.6)
+- Webhook service: polling-mode agents (no endpoint) marked as `delivered` instead of `failed`
+- Stats API: counts `online` and `active` agents (was only `active`)
+- Match service: populates `trust_summary` from match data
+- Intent matching: city-level location filtering (not just country)
+- Card builders: use actual `agent_type`/`status` instead of hardcoded values
+- Visibility service: `location_country` default changed to `circle_only`
+- Agent service: graduated public eligibility gate (email + extra verification)
+- CI: conditional jobs for private-only directories (hashFiles guard)
+- Infrastructure docs: `us-west1` → `us-central1`
+- Privacy policy: accurately states 90-day payload retention
+
+### Fixed
+- Webhook retry loop for agents without endpoints
+- Connect endpoint: `api_endpoint` corrected to `/v1/relationships/import`
+- Approval URL: changed to query parameter format `?token=`
+- `datetime.utcnow()` → `datetime.now(timezone.utc)` (deprecation fix)
+- Strength derivation: proper datetime comparison (was string-based)
+- 4 models exported from `__init__.py` (TrustMetricsDaily, PopularityMetricsDaily, PassportLiteReceipt, IdempotencyRecord)
+
+---
+
 ## [0.1.2] — 2026-03-18
 
 ### Changed
