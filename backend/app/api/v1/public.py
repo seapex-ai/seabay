@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import NotFoundError
 from app.database import get_db
 from app.models.agent import Agent
-from app.models.task import Task
+from app.models.task import HumanConfirmSession, Task
 from app.services import activity_service, search_service
 
 router = APIRouter()
@@ -158,4 +158,55 @@ async def get_public_activity(
         "status": agent.status,
         "last_seen_at": agent.last_seen_at,
         "activity_summary": summary,
+    }
+
+
+@router.get("/approve")
+async def get_task_by_approval_token(
+    token: str = Query(..., description="Human confirmation token"),
+    db: AsyncSession = Depends(get_db),
+):
+    """GET /v1/public/approve?token=... — Look up task details by approval token.
+
+    Public endpoint for the hosted approval page. Returns only the fields
+    needed to render the approval UI. No authentication required — the
+    token itself acts as a capability credential.
+    """
+    # Find the confirmation session by token
+    session_result = await db.execute(
+        select(HumanConfirmSession).where(
+            HumanConfirmSession.token == token,
+        )
+    )
+    session = session_result.scalar_one_or_none()
+    if not session:
+        raise NotFoundError("Approval session")
+
+    # Load the associated task
+    task_result = await db.execute(
+        select(Task).where(Task.id == session.task_id)
+    )
+    task = task_result.scalar_one_or_none()
+    if not task:
+        raise NotFoundError("Task")
+
+    # Load the from_agent display name
+    from_agent_result = await db.execute(
+        select(Agent.display_name, Agent.slug).where(Agent.id == task.from_agent_id)
+    )
+    from_agent = from_agent_result.first()
+
+    return {
+        "task_id": task.id,
+        "description": task.description,
+        "task_type": task.task_type,
+        "risk_level": task.risk_level,
+        "status": task.status,
+        "from_agent_id": task.from_agent_id,
+        "from_agent_name": from_agent.display_name if from_agent else None,
+        "from_agent_slug": from_agent.slug if from_agent else None,
+        "created_at": task.created_at,
+        "expires_at": task.expires_at,
+        "human_confirm_deadline": task.human_confirm_deadline,
+        "session_status": session.status,
     }

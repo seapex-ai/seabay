@@ -1,14 +1,19 @@
 """Contact policy service — enforces who can task / contact whom.
 
+NOTE: This service provides higher-level policy checks (check_can_task,
+check_can_introduce). The lower-level contact permission check lives in
+relationship_service.check_contact_allowed, which handles visibility,
+blocking, and origin-based policies. Both must agree for contact to proceed.
+
 Implements spec §8 (contact policy enforcement):
 - known_direct: only existing relationships can initiate tasks
-- circle_intro_only: must share a circle or be introduced
+- circle_request: must share a circle or be introduced (enum: ContactPolicy.CIRCLE_REQUEST)
 - public_service_only: anyone can task (for service agents)
 - request_approval: requires approval before task can proceed
 
 Also enforces introduction_policy:
 - open: anyone in network can introduce
-- mutual_only: only mutual connections can introduce
+- confirm_required: only mutual connections can introduce (enum: IntroductionPolicy.CONFIRM_REQUIRED)
 - closed: no introductions accepted
 """
 
@@ -54,7 +59,7 @@ async def check_can_task(
             )
         return
 
-    if policy == ContactPolicy.CIRCLE_INTRO_ONLY.value:
+    if policy == ContactPolicy.CIRCLE_REQUEST.value:
         if edge and not edge.is_blocked:
             return
 
@@ -68,9 +73,15 @@ async def check_can_task(
             "introduced contacts."
         )
 
-    if policy == ContactPolicy.REQUEST_APPROVAL.value:
-        # Tasks always allowed but need explicit acceptance
-        return
+    if policy == ContactPolicy.INTRO_ONLY.value:
+        # intro_only: tasks allowed if relationship + acceptable origin exists
+        if edge and not edge.is_blocked:
+            return
+
+        raise ForbiddenError(
+            "This agent only accepts tasks from introduced or "
+            "previously collaborated contacts."
+        )
 
     # Fallback: deny unknown policies
     raise ForbiddenError("Contact not permitted by agent's policy")
@@ -102,7 +113,7 @@ async def check_can_introduce(
             )
         return
 
-    if policy == IntroductionPolicy.MUTUAL_ONLY.value:
+    if policy == IntroductionPolicy.CONFIRM_REQUIRED.value:
         # Both directions must exist
         fwd = await _get_relationship(db, introducer.id, target.id)
         rev = await _get_relationship(db, target.id, introducer.id)

@@ -22,15 +22,31 @@ from app.models.relationship import RelationshipEdge
 from app.models.task import Task
 from app.services.visibility_service import ACCESS_LEVELS, PERSONAL_DEFAULTS, VIEWER_LEVELS
 
-# SQL CASE expression for trust_first sorting using actual verification weights
-# manual_review(4) > workspace(3) > github/domain(2) > email(1) > none(0)
+# Hosted weight overrides (graceful fallback to defaults)
+try:
+    from app.hosted.weights import SEARCH_VERIFICATION_WEIGHTS as _HOSTED_SEARCH_WEIGHTS
+except ImportError:
+    _HOSTED_SEARCH_WEIGHTS = None
+
+_DEFAULT_SEARCH_WEIGHTS = {
+    "manual_review": 4,
+    "workspace": 3,
+    "github": 2,
+    "domain": 1.5,
+    "email": 1,
+    "none": 0,
+}
+
+_SEARCH_WEIGHTS = _HOSTED_SEARCH_WEIGHTS if _HOSTED_SEARCH_WEIGHTS is not None else _DEFAULT_SEARCH_WEIGHTS
+
+# SQL CASE expression for trust_first sorting using verification weights
 _VERIFICATION_WEIGHT_EXPR = case(
-    (Agent.verification_level == "manual_review", 4),
-    (Agent.verification_level == "workspace", 3),
-    (Agent.verification_level == "github", 2),
-    (Agent.verification_level == "domain", 2),
-    (Agent.verification_level == "email", 1),
-    else_=0,
+    (Agent.verification_level == "manual_review", _SEARCH_WEIGHTS.get("manual_review", 4)),
+    (Agent.verification_level == "workspace", _SEARCH_WEIGHTS.get("workspace", 3)),
+    (Agent.verification_level == "github", _SEARCH_WEIGHTS.get("github", 2)),
+    (Agent.verification_level == "domain", _SEARCH_WEIGHTS.get("domain", 1.5)),
+    (Agent.verification_level == "email", _SEARCH_WEIGHTS.get("email", 1)),
+    else_=_SEARCH_WEIGHTS.get("none", 0),
 )
 
 

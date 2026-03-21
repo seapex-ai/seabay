@@ -87,7 +87,7 @@ class TestPersonalDefaults:
 
     def test_location_private(self):
         assert PERSONAL_DEFAULTS["location_city"] == "private"
-        assert PERSONAL_DEFAULTS["location_country"] == "private"
+        assert PERSONAL_DEFAULTS["location_country"] == "circle_only"
 
     def test_looking_for_private(self):
         assert PERSONAL_DEFAULTS["looking_for"] == "private"
