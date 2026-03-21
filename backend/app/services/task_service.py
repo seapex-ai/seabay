@@ -6,6 +6,7 @@ Covers spec §12 (task state machine), §12.3 (risk levels & human confirm),
 
 from __future__ import annotations
 
+import json
 import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -35,6 +36,9 @@ from app.models.enums import (
 from app.models.interaction import Interaction
 from app.models.task import HumanConfirmSession, Task
 from app.services.dlp_service import BLOCKED_PATTERNS, scan_content
+
+# Maximum payload_inline size: 64KB when serialized to JSON
+MAX_PAYLOAD_INLINE_BYTES = 64 * 1024
 
 
 async def get_task(db: AsyncSession, task_id: str) -> Task:
@@ -136,6 +140,14 @@ async def create_task(
     if to_agent_id == from_agent.id:
         raise InvalidRequestError("Cannot create task to self")
 
+    # Validate payload_inline size (64KB limit)
+    if payload_inline is not None:
+        payload_bytes = len(json.dumps(payload_inline, default=str).encode("utf-8"))
+        if payload_bytes > MAX_PAYLOAD_INLINE_BYTES:
+            raise InvalidRequestError(
+                f"payload_inline exceeds 64KB limit ({payload_bytes} bytes)"
+            )
+
     # Check target exists
     target_result = await db.execute(select(Agent).where(Agent.id == to_agent_id))
     target = target_result.scalar_one_or_none()
@@ -152,6 +164,10 @@ async def create_task(
 
     # Contact policy
     await relationship_service.check_contact_allowed(db, from_agent, target)
+
+    # Budget check (anti-spam, spec §15.1)
+    from app.services import budget_service
+    await budget_service.check_budget(db, from_agent, "new_direct_task")
 
     # DLP scan
     task_id = generate_id("task")
@@ -298,15 +314,25 @@ async def complete_task(
     task.status = TaskStatus.COMPLETED.value
     task.completed_at = now
 
+    # Compute latency_ms from task creation to completion
+    latency_ms = None
+    if task.created_at:
+        created = task.created_at
+        if isinstance(created, str):
+            created = datetime.fromisoformat(created.replace("Z", "+00:00"))
+        latency_ms = int((now - created).total_seconds() * 1000)
+
     # Log interaction
-    db.add(Interaction(
+    interaction = Interaction(
         id=generate_id("interaction"),
         task_id=task.id,
         from_agent_id=task.from_agent_id,
         to_agent_id=task.to_agent_id,
         outcome="success",
         rating_by_from=int(rating) if rating else None,
-    ))
+        latency_ms=latency_ms,
+    )
+    db.add(interaction)
 
     # Update relationship stats
     await relationship_service.record_interaction_on_edge(
@@ -428,7 +454,7 @@ def task_to_response(task: Task) -> dict:
     """Convert Task to response dict with approval_url for R2/R3."""
     approval_url = None
     if task.status == TaskStatus.WAITING_HUMAN_CONFIRM.value and task.human_confirm_token:
-        approval_url = f"https://seabay.ai/approve/{task.human_confirm_token}"
+        approval_url = f"https://seabay.ai/approve/?token={task.human_confirm_token}"
 
     return {
         "id": task.id,

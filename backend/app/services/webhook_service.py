@@ -89,9 +89,33 @@ async def deliver_task_to_agent(
     # Get target agent
     result = await db.execute(select(Agent).where(Agent.id == task.to_agent_id))
     target = result.scalar_one_or_none()
-    if not target or not target.endpoint:
-        logger.warning("Task %s: target agent has no endpoint", task.id)
+    if not target:
+        logger.warning("Task %s: target agent not found, marking as failed", task.id)
+        task.status = TaskStatus.FAILED.value
+        task.delivery_attempts += 1
+        await db.flush()
         return False
+
+    if not target.endpoint:
+        # Polling-mode agent: no webhook endpoint, mark as delivered.
+        # Agent will pick up the task via GET /tasks/inbox.
+        task.status = TaskStatus.DELIVERED.value
+        task.delivery_attempts += 1
+        logger.info("Task %s: target agent uses polling mode, marked as delivered", task.id)
+
+        # Still push SSE notification (best-effort)
+        from app.services import notification_service
+        await notification_service.notify_task_event(
+            agent_id=task.to_agent_id,
+            event_type="task.created",
+            task_id=task.id,
+            from_agent_id=task.from_agent_id,
+            task_type=task.task_type,
+            status=task.status,
+            description=task.description,
+        )
+        await db.flush()
+        return True
 
     # Build webhook payload
     payload = {

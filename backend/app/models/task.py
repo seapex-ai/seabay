@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Dict, Optional
 
-from sqlalchemy import Boolean, DateTime, Integer, SmallInteger, String, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, SmallInteger, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -14,9 +14,9 @@ class Task(Base):
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True)
     idempotency_key: Mapped[str] = mapped_column(String(64), nullable=False)
-    from_agent_id: Mapped[str] = mapped_column(String(32), nullable=False)
-    to_agent_id: Mapped[str] = mapped_column(String(32), nullable=False)
-    intent_id: Mapped[Optional[str]] = mapped_column(String(32))
+    from_agent_id: Mapped[str] = mapped_column(String(32), ForeignKey("agents.id"), nullable=False)
+    to_agent_id: Mapped[str] = mapped_column(String(32), ForeignKey("agents.id"), nullable=False)
+    intent_id: Mapped[Optional[str]] = mapped_column(String(32), ForeignKey("intents.id"))
 
     task_type: Mapped[str] = mapped_column(String(30), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text)
@@ -61,7 +61,7 @@ class HumanConfirmSession(Base):
     __tablename__ = "human_confirm_sessions"
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True)
-    task_id: Mapped[str] = mapped_column(String(32), nullable=False)
+    task_id: Mapped[str] = mapped_column(String(32), ForeignKey("tasks.id"), nullable=False)
     issued_for_agent_id: Mapped[str] = mapped_column(String(32), nullable=False)
     token: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
     channel: Mapped[str] = mapped_column(String(20), nullable=False)

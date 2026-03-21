@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Dict, Optional
 
-from sqlalchemy import DateTime, String, func
+from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -13,7 +13,7 @@ class Verification(Base):
     __tablename__ = "verifications"
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True)
-    agent_id: Mapped[str] = mapped_column(String(32), nullable=False)
+    agent_id: Mapped[str] = mapped_column(String(32), ForeignKey("agents.id", ondelete="CASCADE"), nullable=False)
 
     method: Mapped[str] = mapped_column(String(16), nullable=False)
     status: Mapped[str] = mapped_column(String(12), nullable=False, default="pending")

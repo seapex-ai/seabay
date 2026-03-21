@@ -138,12 +138,15 @@ async def update_agent(
             if field in ("visibility_scope", "contact_policy", "introduction_policy"):
                 value = value.value if hasattr(value, "value") else value
 
-            # Personal agents cannot set visibility_scope=public (requires eligibility gate)
+            # Personal agents can go public IF they have email + at least one extra verification
             if field == "visibility_scope" and value == "public":
                 if agent.agent_type == AgentType.PERSONAL.value:
-                    raise InvalidRequestError(
-                        "Personal agents cannot set visibility_scope to public"
-                    )
+                    eligible = await _check_personal_public_eligibility(db, agent.id)
+                    if not eligible:
+                        raise InvalidRequestError(
+                            "Personal agents require email verification plus at least "
+                            "one additional verification (github or domain) to go public"
+                        )
 
             # public_service_only contact policy is only valid for service agents
             if field == "contact_policy" and value == ContactPolicy.PUBLIC_SERVICE_ONLY.value:
@@ -578,3 +581,30 @@ async def compute_verification_level(db: AsyncSession, agent_id: str) -> str:
             continue
 
     return max_level
+
+
+async def _check_personal_public_eligibility(db: AsyncSession, agent_id: str) -> bool:
+    """Check if a personal agent meets the graduated public eligibility criteria.
+
+    Requires:
+    1. A verified email verification
+    2. At least one additional verification (github or domain)
+    """
+    result = await db.execute(
+        select(Verification).where(
+            Verification.agent_id == agent_id,
+            Verification.status == "verified",
+        )
+    )
+    verifications = result.scalars().all()
+
+    has_email = False
+    has_extra = False
+
+    for v in verifications:
+        if v.method == "email":
+            has_email = True
+        elif v.method in ("github", "domain"):
+            has_extra = True
+
+    return has_email and has_extra

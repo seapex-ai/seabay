@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from sqlalchemy import DateTime, Integer, String, Text, func
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.agent import Base
@@ -13,13 +13,13 @@ class Introduction(Base):
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True)
     introducer_id: Mapped[str] = mapped_column(
-        "introducer_agent_id", String(32), nullable=False,
+        "introducer_agent_id", String(32), ForeignKey("agents.id"), nullable=False,
     )
     target_a_id: Mapped[str] = mapped_column(
-        "target_a_agent_id", String(32), nullable=False,
+        "target_a_agent_id", String(32), ForeignKey("agents.id"), nullable=False,
     )
     target_b_id: Mapped[str] = mapped_column(
-        "target_b_agent_id", String(32), nullable=False,
+        "target_b_agent_id", String(32), ForeignKey("agents.id"), nullable=False,
     )
 
     reason: Mapped[Optional[str]] = mapped_column("message", Text)

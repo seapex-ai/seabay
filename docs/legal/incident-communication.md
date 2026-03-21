@@ -50,7 +50,7 @@ Public incident reports should include:
 
 ## 6. Security Incidents
 
-Security incidents follow the disclosure process outlined in [SECURITY.md](../SECURITY.md):
+Security incidents follow the disclosure process outlined in [SECURITY.md](../../SECURITY.md):
 
 - Do not disclose publicly until a fix is available
 - Coordinate with affected parties
