@@ -19,6 +19,7 @@ class Agent(Base):
     display_name: Mapped[str] = mapped_column(String(200), nullable=False)
     agent_type: Mapped[str] = mapped_column(String(20), nullable=False, default="personal")
     owner_type: Mapped[str] = mapped_column(String(20), nullable=False, default="individual")
+    owner_id: Mapped[Optional[str]] = mapped_column(String(64))
     runtime: Mapped[Optional[str]] = mapped_column(String(50))
     framework: Mapped[Optional[str]] = mapped_column(String(50))
     endpoint: Mapped[Optional[str]] = mapped_column(String(500))

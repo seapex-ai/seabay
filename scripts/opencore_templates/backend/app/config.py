@@ -38,12 +38,14 @@ class Settings(BaseSettings):
     TASK_HUMAN_CONFIRM_TIMEOUT_R2: int = 14400
     TASK_HUMAN_CONFIRM_TIMEOUT_R3: int = 43200
 
-    # Open-core ships without tuned anti-abuse thresholds.
-    BUDGET_NEW_DIRECT_TASK_DAILY: int = 0
-    BUDGET_INTRODUCTION_DAILY: int = 0
-    BUDGET_CIRCLE_REQUEST_DAILY: int = 0
-    REPORT_SOFT_FREEZE_THRESHOLD: int = 0
-    REPORT_SUSPEND_THRESHOLD: int = 0
+    # Anti-Spam Budgets (personal agents)
+    BUDGET_NEW_DIRECT_TASK_DAILY: int = 5
+    BUDGET_INTRODUCTION_DAILY: int = 3
+    BUDGET_CIRCLE_REQUEST_DAILY: int = 5
+
+    # Report Thresholds
+    REPORT_SOFT_FREEZE_THRESHOLD: int = 3
+    REPORT_SUSPEND_THRESHOLD: int = 5
 
     # Online Status
     ONLINE_AWAY_THRESHOLD: int = 300

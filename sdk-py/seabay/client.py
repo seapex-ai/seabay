@@ -263,10 +263,17 @@ class SeabayClient:
     # ── Passport Lite ──
 
     def get_my_passports(self) -> list[dict]:
-        """Passport receipt APIs are hosted-only and excluded from open-core."""
-        raise NotImplementedError(
-            "Passport receipt APIs are not part of the public open-core surface."
-        )
+        """Get passport receipts for the current agent."""
+        data = self._request("GET", "/agents/me/passports")
+        return data.get("data", [])
+
+    def verify_passport(self, receipt_id: str) -> dict:
+        """Verify a passport receipt."""
+        return self._request("GET", f"/passports/{receipt_id}/verify")
+
+    def revoke_passport(self, receipt_id: str) -> dict:
+        """Revoke a passport receipt."""
+        return self._request("POST", f"/passports/{receipt_id}/revoke")
 
     # ── Activity & Stats ──
 

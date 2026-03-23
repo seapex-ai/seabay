@@ -1,0 +1,30 @@
+name: Mirror to Gitee
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Mirror to Gitee
+        env:
+          GITEE_SSH_KEY: ${{ secrets.GITEE_SSH_KEY }}
+          GITEE_REPO: ${{ secrets.GITEE_REPO }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$GITEE_SSH_KEY" > ~/.ssh/gitee_key
+          chmod 600 ~/.ssh/gitee_key
+          ssh-keyscan -t rsa gitee.com >> ~/.ssh/known_hosts 2>/dev/null
+
+          git remote add gitee "git@gitee.com:${GITEE_REPO}.git" || true
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/gitee_key -o StrictHostKeyChecking=no" \
+            git push --mirror gitee

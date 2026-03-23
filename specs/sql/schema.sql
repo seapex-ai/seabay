@@ -14,13 +14,17 @@ CREATE TABLE agents (
     id              VARCHAR(32)  PRIMARY KEY,            -- agt_{nanoid_21}
     slug            VARCHAR(64)  NOT NULL UNIQUE,
     display_name    VARCHAR(128) NOT NULL,
-    agent_type      VARCHAR(16)  NOT NULL DEFAULT 'personal'
-                        CHECK (agent_type IN ('service', 'personal')),
-    owner_type      VARCHAR(16)  NOT NULL DEFAULT 'individual'
+    agent_type      VARCHAR(20)  NOT NULL DEFAULT 'personal'
+                        CHECK (agent_type IN ('service', 'personal', 'proxy', 'worker', 'org')),
+    owner_type      VARCHAR(20)  NOT NULL DEFAULT 'individual'
                         CHECK (owner_type IN ('individual', 'organization')),
-    runtime         VARCHAR(32),                         -- e.g. 'openclaw', 'dify', 'coze', 'custom'
+    owner_id        VARCHAR(64),                         -- external owner identifier
+    runtime         VARCHAR(50),                         -- e.g. 'openclaw', 'dify', 'coze', 'custom'
+    framework       VARCHAR(50),                         -- e.g. 'langchain', 'autogen'
     endpoint        TEXT,                                -- webhook / A2A endpoint URL
+    namespace       VARCHAR(200),                        -- org/team namespace
     api_key_hash    VARCHAR(128),                        -- bcrypt hash of sk_live_{key}
+    api_key_prefix  VARCHAR(16),                         -- first 8 chars for lookup
 
     verification_level VARCHAR(16) NOT NULL DEFAULT 'none'
                         CHECK (verification_level IN ('none','email','github','domain','workspace','manual_review')),
@@ -221,6 +225,12 @@ CREATE TABLE intents (
     audience_scope  VARCHAR(64) NOT NULL DEFAULT 'public'
                         CHECK (audience_scope ~ '^(public|network|circle:.+)$'),
 
+    target_pools    TEXT[]      DEFAULT '{}',
+    budget_range    VARCHAR(64),
+    trust_requirement VARCHAR(20),
+    match_target_type VARCHAR(20),
+    request_form    JSONB,                               -- structured form schema for task creation
+
     status          VARCHAR(12) NOT NULL DEFAULT 'active'
                         CHECK (status IN ('active','matched','fulfilled','expired','cancelled')),
     max_matches     INTEGER     NOT NULL DEFAULT 5,
@@ -245,11 +255,14 @@ CREATE TABLE tasks (
     to_agent_id     VARCHAR(32) NOT NULL REFERENCES agents(id),
     intent_id       VARCHAR(32) REFERENCES intents(id),
 
-    task_type       VARCHAR(20) NOT NULL
+    task_type       VARCHAR(30) NOT NULL
                         CHECK (task_type IN ('service_request','collaboration','introduction')),
     description     TEXT,
-    payload_ref     TEXT,                                 -- blob:// reference or inline ≤100KB
+    payload_ref     VARCHAR(500),                         -- blob:// reference or inline ≤100KB
     payload_inline  JSONB,
+
+    conversation_ref VARCHAR(128),                        -- external conversation reference
+    thread_ref       VARCHAR(128),                        -- external thread reference
 
     risk_level      VARCHAR(4)  NOT NULL DEFAULT 'R0'
                         CHECK (risk_level IN ('R0','R1','R2','R3')),
@@ -503,3 +516,35 @@ CREATE TABLE popularity_metrics_daily (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (agent_id, metric_date)
 );
+
+-- ======================== audit_logs ========================
+CREATE TABLE audit_logs (
+    id              VARCHAR(32)  PRIMARY KEY,             -- aud_{nanoid_21}
+    action          VARCHAR(64)  NOT NULL,                -- e.g. 'agent.register', 'task.complete', 'report.action'
+    actor_id        VARCHAR(32),                          -- agent or system that performed the action
+    target_id       VARCHAR(32),                          -- target entity (agent, task, etc.)
+    details         JSONB        DEFAULT '{}',            -- additional context
+    created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_audit_actor ON audit_logs (actor_id);
+CREATE INDEX idx_audit_target ON audit_logs (target_id);
+CREATE INDEX idx_audit_action ON audit_logs (action);
+
+-- ======================== installations ========================
+CREATE TABLE installations (
+    id              VARCHAR(32)  PRIMARY KEY,             -- ins_{nanoid_21}
+    host_type       VARCHAR(20)  NOT NULL
+                        CHECK (host_type IN ('claude','chatgpt','gemini','grok','openclaw','shell','generic')),
+    linked_agent_id VARCHAR(32)  REFERENCES agents(id),   -- existing Seabay agent identity
+    proxy_agent_id  VARCHAR(32)  REFERENCES agents(id),   -- auto-created proxy agent
+    oauth_subject   VARCHAR(256),                          -- OAuth subject identifier
+    granted_scopes  TEXT[]       DEFAULT '{}',             -- OAuth scopes
+
+    region          VARCHAR(10)  NOT NULL DEFAULT 'intl',
+    created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_installations_host ON installations (host_type);
+CREATE INDEX idx_installations_agent ON installations (linked_agent_id);

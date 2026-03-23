@@ -8,6 +8,9 @@ import enum
 class AgentType(str, enum.Enum):
     SERVICE = "service"
     PERSONAL = "personal"
+    PROXY = "proxy"
+    WORKER = "worker"
+    ORG = "org"
 
 
 class OwnerType(str, enum.Enum):

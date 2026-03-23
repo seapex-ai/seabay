@@ -188,7 +188,7 @@ async def cancel_task(
 def _task_to_response(task: Task) -> TaskResponse:
     approval_url = None
     if task.status == TaskStatus.WAITING_HUMAN_CONFIRM.value and task.human_confirm_token:
-        approval_url = f"https://seabay.ai/approve/{task.human_confirm_token}"
+        approval_url = f"https://seabay.ai/approve/?token={task.human_confirm_token}"
 
     return TaskResponse(
         id=task.id,

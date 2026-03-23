@@ -9,20 +9,27 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Install ruff
         run: pip install ruff
       - name: Lint public Python surfaces
-        run: ruff check backend adapters examples
+        run: |
+          DIRS="backend adapters examples"
+          [ -d apps ] && DIRS="$DIRS apps"
+          [ -d agents ] && DIRS="$DIRS agents"
+          [ -d shell-cli ] && DIRS="$DIRS shell-cli"
+          ruff check $DIRS --extend-exclude "**/node_modules"
 
   test-unit:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -35,6 +42,7 @@ jobs:
 
   test-integration:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -59,7 +67,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -81,9 +89,10 @@ jobs:
 
   docker:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [lint, test-unit]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build Docker image
         run: docker build -t seabay-api:${{ github.sha }} backend/
       - name: Verify entrypoint exists
@@ -94,3 +103,54 @@ jobs:
         run: |
           docker run --rm --entrypoint="" seabay-api:${{ github.sha }} \
             python -c "from app.main import app; print('OK: app imports successfully')"
+
+  # ── MCP Edge syntax check (skips if dir absent) ──
+  mcp-edge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        if: hashFiles('apps/mcp-edge/main.py') != ''
+        with:
+          python-version: "3.12"
+      - name: Syntax check MCP Edge
+        if: hashFiles('apps/mcp-edge/main.py') != ''
+        run: find apps/mcp-edge -name "*.py" -exec python -m py_compile {} +
+      - name: Skip (dir not present)
+        if: hashFiles('apps/mcp-edge/main.py') == ''
+        run: echo "apps/mcp-edge/ not present, skipping"
+
+  # ── Shell CLI syntax check (skips if dir absent) ──
+  shell-cli:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        if: hashFiles('shell-cli/seabay_shell/main.py') != ''
+        with:
+          python-version: "3.12"
+      - name: Syntax check Shell CLI
+        if: hashFiles('shell-cli/seabay_shell/main.py') != ''
+        run: find shell-cli -name "*.py" -exec python -m py_compile {} +
+      - name: Skip (dir not present)
+        if: hashFiles('shell-cli/seabay_shell/main.py') == ''
+        run: echo "shell-cli/ not present, skipping"
+
+  # ── Seed Agents syntax check (skips if dir absent) ──
+  seed-agents:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        if: hashFiles('agents/translator/agent.py') != ''
+        with:
+          python-version: "3.12"
+      - name: Syntax check all agents
+        if: hashFiles('agents/translator/agent.py') != ''
+        run: find agents -name "*.py" -exec python -m py_compile {} +
+      - name: Skip (dir not present)
+        if: hashFiles('agents/translator/agent.py') == ''
+        run: echo "agents/ not present, skipping"

@@ -32,7 +32,7 @@ PERSONAL_DEFAULTS: dict[str, str] = {
     "interests": "network_only",
     "languages": "network_only",
     "location_city": "private",
-    "location_country": "private",
+    "location_country": "circle_only",
     "timezone": "private",
     "can_offer": "network_only",
     "looking_for": "private",       # forced — never public

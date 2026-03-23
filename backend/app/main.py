@@ -33,6 +33,7 @@ async def lifespan(app: FastAPI):
 
     # Start background workers
     from app.workers.metrics_aggregator import run_metrics_aggregator
+    from app.workers.payload_cleaner import run_payload_cleaner
     from app.workers.status_decay import run_status_decay
     from app.workers.strength_deriver import run_strength_deriver
     from app.workers.task_delivery import run_delivery_worker
@@ -43,6 +44,7 @@ async def lifespan(app: FastAPI):
     worker_tasks.append(asyncio.create_task(run_status_decay(shutdown_event)))
     worker_tasks.append(asyncio.create_task(run_strength_deriver(shutdown_event)))
     worker_tasks.append(asyncio.create_task(run_metrics_aggregator(shutdown_event)))
+    worker_tasks.append(asyncio.create_task(run_payload_cleaner(shutdown_event)))
 
     # Production safety checks
     if not settings.DEBUG:

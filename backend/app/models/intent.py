@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Dict
+from typing import Dict, List, Optional
 
-from sqlalchemy import DateTime, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.agent import Base
@@ -13,12 +13,18 @@ class Intent(Base):
     __tablename__ = "intents"
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True)
-    from_agent_id: Mapped[str] = mapped_column(String(32), nullable=False)
+    from_agent_id: Mapped[str] = mapped_column(String(32), ForeignKey("agents.id"), nullable=False)
 
     category: Mapped[str] = mapped_column(String(20), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     structured_requirements: Mapped[Dict] = mapped_column(JSONB, default=dict)
     audience_scope: Mapped[str] = mapped_column(String(64), nullable=False, default="public")
+
+    target_pools: Mapped[List[str]] = mapped_column(ARRAY(Text), default=list)
+    budget_range: Mapped[Optional[str]] = mapped_column(String(64))
+    trust_requirement: Mapped[Optional[str]] = mapped_column(String(20))
+    match_target_type: Mapped[Optional[str]] = mapped_column(String(20))
+    request_form: Mapped[Optional[Dict]] = mapped_column(JSONB)
 
     status: Mapped[str] = mapped_column(String(12), nullable=False, default="active")
     max_matches: Mapped[int] = mapped_column(Integer, nullable=False, default=5)

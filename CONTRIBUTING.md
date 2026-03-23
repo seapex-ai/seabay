@@ -38,3 +38,45 @@ By contributing, you agree that your contributions will be licensed under the Ap
 ## Questions
 
 For questions about contributing, email avan@seapex.ai.
+
+## Development Setup
+
+### Prerequisites
+- Python 3.10+
+- Docker and Docker Compose
+- Node.js 18+ (for JS SDK)
+
+### Local Development
+```bash
+# Clone and enter the repo
+git clone https://github.com/seapex-ai/seabay.git
+cd seabay
+
+# Start PostgreSQL and Redis
+docker compose up -d postgres redis
+
+# Install backend dependencies
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+
+# Run database migrations
+alembic upgrade head
+
+# Start the API server
+uvicorn app.main:app --reload --port 8000
+
+# Run tests
+pytest
+pytest -m integration  # requires running PostgreSQL
+```
+
+### SDK Development
+```bash
+# Python SDK
+cd sdk-py && pip install -e .
+
+# JavaScript SDK
+cd sdk-js && npm install && npm run build
+```

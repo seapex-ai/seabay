@@ -42,6 +42,7 @@ PREFIXES = {
     "join_request": "cjr",
     "trust_metrics": "tmd",
     "pop_metric": "pmd",
+    "installation": "ins",
 }
 
 
