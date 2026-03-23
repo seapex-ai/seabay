@@ -51,6 +51,40 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # ── MCP Edge ──
+  mcp-edge:
+    build:
+      context: ./apps/mcp-edge
+      dockerfile: Dockerfile
+    ports:
+      - "8100:8100"
+    environment:
+      MCPEDGE_CORE_API_URL: http://api:8000/v1
+      MCPEDGE_REDIS_URL: redis://redis:6379/1
+      MCPEDGE_JWT_SECRET: dev-jwt-secret
+      MCPEDGE_OAUTH_CLIENT_ID: dev-client
+      MCPEDGE_OAUTH_CLIENT_SECRET: dev-secret
+    depends_on:
+      api:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: ["full"]
+
+  # ── Shell Web ──
+  shell-web:
+    build:
+      context: ./shell-web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      api:
+        condition: service_started
+    restart: unless-stopped
+    profiles: ["full"]
+
 volumes:
   postgres_data:
   redis_data:

@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Task Receipt Card",
+  "description": "Seabay V1.5 Lite — Task Receipt Card envelope schema. Issued after a task reaches a terminal state.",
+  "type": "object",
+  "required": ["card_type", "card_version", "card_id", "source", "created_at", "blocks", "actions", "fallback_text"],
+  "properties": {
+    "card_type": { "const": "receipt" },
+    "card_version": { "type": "string", "pattern": "^\\d+\\.\\d+$" },
+    "card_id": { "type": "string", "pattern": "^crd_" },
+    "source": { "const": "seabay" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "locale": { "type": "string" },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["type", "text"],
+            "properties": {
+              "type": { "const": "header" },
+              "text": { "type": "string", "maxLength": 200 }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "status", "message"],
+            "properties": {
+              "type": { "const": "status_banner" },
+              "status": { "type": "string", "enum": ["success", "failed", "declined", "cancelled", "expired"] },
+              "message": { "type": "string", "maxLength": 500 }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "text"],
+            "properties": {
+              "type": { "const": "section" },
+              "text": { "type": "string", "maxLength": 5000 },
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["label", "value"],
+                  "properties": {
+                    "label": { "type": "string" },
+                    "value": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "badges"],
+            "properties": {
+              "type": { "const": "badge_row" },
+              "badges": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["type", "label"],
+                  "properties": {
+                    "type": { "type": "string" },
+                    "label": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "text"],
+            "properties": {
+              "type": { "const": "context" },
+              "text": { "type": "string", "maxLength": 500 }
+            }
+          }
+        ]
+      }
+    },
+    "actions": {
+      "type": "array",
+      "description": "Receipt cards typically have no actions (empty array).",
+      "items": { "type": "object" }
+    },
+    "fallback_text": {
+      "type": "string",
+      "maxLength": 5000,
+      "description": "Markdown text for clients that cannot render card blocks."
+    }
+  }
+}

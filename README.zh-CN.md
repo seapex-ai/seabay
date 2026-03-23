@@ -278,7 +278,7 @@ Seabayai/
 
 ## 中国区域运营说明
 
-> **区域说明:** Seabay V1.5 部署在 Google Cloud Platform (us-west1)。
+> **区域说明:** Seabay V1.5 部署在 Google Cloud Platform (us-central1)。
 > 不面向中国大陆公众运营。
 > 有关区域策略和合规详情，请参阅 [docs/REGION_POLICY.md](docs/REGION_POLICY.md)。
 

@@ -32,6 +32,30 @@ from app.models.interaction import Interaction
 from app.models.report import Report
 from app.models.task import Task
 
+# Hosted weight overrides (graceful fallback to defaults)
+try:
+    from app.hosted.weights import TRUST_WEIGHTS as _HOSTED_TRUST_WEIGHTS
+except ImportError:
+    _HOSTED_TRUST_WEIGHTS = None
+
+_DEFAULT_TRUST_WEIGHTS = {
+    "verification": {
+        "manual_review": 100,
+        "workspace": 75,
+        "github": 50,
+        "domain": 40,
+        "email": 25,
+        "none": 0,
+    },
+    "success_rate_7d": 0.30,
+    "report_rate_30d": -0.50,
+    "human_confirm_success": 0.15,
+    "avg_latency_factor": -0.05,
+    "cancel_rate": -0.10,
+}
+
+TRUST_WEIGHTS = _HOSTED_TRUST_WEIGHTS if _HOSTED_TRUST_WEIGHTS is not None else _DEFAULT_TRUST_WEIGHTS
+
 
 async def compute_trust_signals(db: AsyncSession, agent_id: str) -> dict:
     """Compute all trust signals for an agent (spec §14.2)."""
@@ -215,11 +239,14 @@ async def compute_popularity_signals(db: AsyncSession, agent_id: str) -> dict:
     )
     tasks_7d = tasks_7d_result.scalar() or 0
 
+    # Pull actual counters from activity_service
+    from app.services import activity_service
+    profile_views = activity_service.get_profile_views(agent_id)
+    search_appearances = activity_service.get_search_appearances(agent_id)
+
     return {
         "task_received_count": tasks_all,
         "task_received_7d": tasks_7d,
-        # profile_views and search_appearances would be tracked via
-        # separate counters/middleware in production
-        "profile_views_7d": 0,
-        "search_appearances_7d": 0,
+        "profile_views_7d": profile_views,
+        "search_appearances_7d": search_appearances,
     }

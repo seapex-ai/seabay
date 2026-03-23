@@ -1518,9 +1518,9 @@ paths:
           application/json:
             schema:
               type: object
-              required: [assignee_agent_id, description]
+              required: [to_agent_id, description]
               properties:
-                assignee_agent_id:
+                to_agent_id:
                   type: string
                   format: uuid
                   description: Agent to assign the task to.
@@ -2934,15 +2934,15 @@ components:
 
     Task:
       type: object
-      required: [id, requester_agent_id, assignee_agent_id, description, status, created_at]
+      required: [id, from_agent_id, to_agent_id, description, status, created_at]
       properties:
         id:
           type: string
           format: uuid
-        requester_agent_id:
+        from_agent_id:
           type: string
           format: uuid
-        assignee_agent_id:
+        to_agent_id:
           type: string
           format: uuid
         intent_id:

@@ -41,11 +41,39 @@ services:
       SEABAY_REGION: intl
       SEABAY_CORS_ORIGINS: ${CORS_ORIGINS}
       SEABAY_PASSPORT_SIGNING_KEY: ${PASSPORT_SIGNING_KEY}
+      LLM_API_URL: ${LLM_API_URL}
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_MODEL: ${LLM_MODEL}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+    restart: unless-stopped
+
+  # ── MCP Edge ──
+  mcp-edge:
+    build:
+      context: ./apps/mcp-edge
+      dockerfile: Dockerfile
+    ports:
+      - "8100:8100"
+    environment:
+      MCPEDGE_CORE_API_URL: http://api:8000/v1
+      MCPEDGE_REDIS_URL: redis://redis:6379/1
+      MCPEDGE_JWT_SECRET: ${MCPEDGE_JWT_SECRET}
+      MCPEDGE_OAUTH_CLIENT_ID: ${MCPEDGE_OAUTH_CLIENT_ID}
+      MCPEDGE_OAUTH_CLIENT_SECRET: ${MCPEDGE_OAUTH_CLIENT_SECRET}
+    depends_on:
+      api:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8100/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
 
 volumes:

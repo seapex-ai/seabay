@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.agent import Base
@@ -14,7 +14,7 @@ class Circle(Base):
     id: Mapped[str] = mapped_column(String(32), primary_key=True)
     name: Mapped[str] = mapped_column(String(128), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text)
-    owner_agent_id: Mapped[str] = mapped_column(String(32), nullable=False)
+    owner_agent_id: Mapped[str] = mapped_column(String(32), ForeignKey("agents.id", ondelete="CASCADE"), nullable=False)
 
     visibility: Mapped[str] = mapped_column(String(20), nullable=False, default="private")
     join_mode: Mapped[str] = mapped_column(String(16), nullable=False, default="invite_only")
@@ -37,8 +37,8 @@ class CircleMembership(Base):
     __tablename__ = "circle_memberships"
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True)
-    circle_id: Mapped[str] = mapped_column(String(32), nullable=False)
-    agent_id: Mapped[str] = mapped_column(String(32), nullable=False)
+    circle_id: Mapped[str] = mapped_column(String(32), ForeignKey("circles.id", ondelete="CASCADE"), nullable=False)
+    agent_id: Mapped[str] = mapped_column(String(32), ForeignKey("agents.id", ondelete="CASCADE"), nullable=False)
     role: Mapped[str] = mapped_column(String(8), nullable=False, default="member")
     invited_by: Mapped[Optional[str]] = mapped_column(String(32))
 
@@ -51,8 +51,8 @@ class CircleJoinRequest(Base):
     __tablename__ = "circle_join_requests"
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True)
-    circle_id: Mapped[str] = mapped_column(String(32), nullable=False)
-    agent_id: Mapped[str] = mapped_column(String(32), nullable=False)
+    circle_id: Mapped[str] = mapped_column(String(32), ForeignKey("circles.id", ondelete="CASCADE"), nullable=False)
+    agent_id: Mapped[str] = mapped_column(String(32), ForeignKey("agents.id"), nullable=False)
     message: Mapped[Optional[str]] = mapped_column(Text)
     status: Mapped[str] = mapped_column(String(12), nullable=False, default="pending")
 

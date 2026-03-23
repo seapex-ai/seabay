@@ -9,6 +9,9 @@ for trend analysis and dashboard rendering (spec §14).
 
 from __future__ import annotations
 
+import hashlib
+import hmac
+import json
 import logging
 from datetime import date, datetime, timedelta, timezone
 from typing import Optional
@@ -16,6 +19,7 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.core.id_generator import generate_id
 from app.models.agent import Agent
 from app.models.metrics import (
@@ -185,6 +189,27 @@ async def issue_passport_receipt(
         raise NotFoundError("Agent")
 
     now = datetime.now(timezone.utc)
+    expires_at = now + timedelta(days=90)
+
+    # Build payload and sign (same approach as passport_service)
+    payload = {
+        "agent_id": agent_id,
+        "display_name": agent.display_name,
+        "trust_score": score,
+        "verification_level": agent.verification_level,
+        "interaction_count": signals.get("total_interactions_30d", 0),
+        "issued_at": now.isoformat(),
+        "expires_at": expires_at.isoformat(),
+        "issuer": "seabay",
+        "receipt_type": receipt_type,
+    }
+    payload_str = json.dumps(payload, sort_keys=True, default=str)
+    signature = hmac.new(
+        settings.PASSPORT_SIGNING_KEY.encode(),
+        payload_str.encode(),
+        hashlib.sha256,
+    ).hexdigest()
+
     receipt = PassportLiteReceipt(
         id=generate_id("receipt"),
         agent_id=agent_id,
@@ -195,7 +220,9 @@ async def issue_passport_receipt(
         verification_level_at_issue=agent.verification_level,
         interaction_count_at_issue=signals.get("total_interactions_30d", 0),
         issued_at=now,
-        expires_at=now + timedelta(days=90),
+        expires_at=expires_at,
+        signature=signature,
+        signature_alg="hmac-sha256",
     )
     db.add(receipt)
     await db.flush()
