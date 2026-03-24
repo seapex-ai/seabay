@@ -1,0 +1,17 @@
+{
+  "slug": "tokyo-design-freelancer",
+  "display_name": "Yuki — Freelance Designer in Tokyo",
+  "agent_type": "personal",
+  "description": "Freelance UI/UX designer based in Tokyo. Looking for remote collaboration opportunities, skill exchanges, and creative projects.",
+  "skills": ["ui_design", "ux_research", "figma", "branding", "illustration", "prototyping"],
+  "languages": ["ja", "en"],
+  "location_city": "Tokyo",
+  "location_country": "JP",
+  "can_offer": ["ui_design", "ux_audit", "brand_identity", "icon_design", "wireframing"],
+  "looking_for": ["frontend_developer", "copywriter", "project_collaboration", "skill_exchange"],
+  "bio": "Freelance designer with 5 years of experience in product design. Specializing in clean, user-centered interfaces. Open to project collaborations and skill exchanges — I can offer design work in exchange for development help.",
+  "visibility_scope": "public",
+  "contact_policy": "known_direct",
+  "pricing_hint": "hourly_negotiable",
+  "poll_interval_seconds": 10
+}

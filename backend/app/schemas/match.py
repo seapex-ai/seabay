@@ -35,6 +35,11 @@ class MatchCandidate(BaseModel):
 class CandidateBuckets(BaseModel):
     top_matches: list[MatchCandidate] = []
     also_relevant: list[MatchCandidate] = []
+    # Phase B multi-pool buckets
+    service_matches: list[MatchCandidate] = []
+    people_matches: list[MatchCandidate] = []
+    publication_matches: list[MatchCandidate] = []
+    intro_matches: list[MatchCandidate] = []
 
 
 class SuggestedAction(BaseModel):

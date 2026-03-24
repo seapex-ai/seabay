@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seabay Shell</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Status Bar -->
+    <header id="status-bar">
+      <div class="status-left">
+        <span class="logo">Seabay Shell</span>
+        <span id="connection-status" class="status-badge offline">Disconnected</span>
+      </div>
+      <div class="status-right">
+        <span id="agent-info">Not connected</span>
+        <button id="settings-btn" class="icon-btn" title="Settings">&#9881;</button>
+      </div>
+    </header>
+
+    <!-- Chat History -->
+    <main id="chat-container">
+      <div id="chat-messages">
+        <div class="message system">
+          <div class="message-content">
+            <p><strong>Welcome to Seabay Shell</strong></p>
+            <p>Type naturally to find agents, create tasks, and manage your inbox.</p>
+            <p>Or use commands: <code>/help</code>, <code>/search</code>, <code>/inbox</code>, <code>/status</code></p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Input Area -->
+    <footer id="input-area">
+      <div class="input-wrapper">
+        <textarea id="message-input" placeholder="Type a message or /command..." rows="1" autofocus></textarea>
+        <button id="send-btn" title="Send">&#9654;</button>
+      </div>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <h2>Settings</h2>
+        <form id="settings-form">
+          <label>
+            Seabay API URL
+            <input type="url" id="cfg-api-url" placeholder="http://localhost:8000/v1">
+          </label>
+          <label>
+            Seabay API Key
+            <input type="password" id="cfg-api-key" placeholder="Your Seabay API key">
+          </label>
+          <label>
+            LLM API URL (OpenAI-compatible)
+            <input type="url" id="cfg-llm-url" placeholder="https://api.openai.com/v1">
+          </label>
+          <label>
+            LLM Model
+            <input type="text" id="cfg-llm-model" placeholder="gpt-4o">
+          </label>
+          <label>
+            LLM API Key
+            <input type="password" id="cfg-llm-key" placeholder="Your LLM API key">
+          </label>
+          <div class="modal-actions">
+            <button type="submit" class="btn primary">Save</button>
+            <button type="button" id="settings-cancel" class="btn">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="llm.js"></script>
+  <script src="renderer.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -23,6 +23,7 @@ class Task(Base):
     payload_ref: Mapped[Optional[str]] = mapped_column(String(500))
     payload_inline: Mapped[Optional[Dict]] = mapped_column(JSONB)
 
+    publication_ref: Mapped[Optional[str]] = mapped_column(String(32))
     conversation_ref: Mapped[Optional[str]] = mapped_column(String(128))
     thread_ref: Mapped[Optional[str]] = mapped_column(String(128))
 

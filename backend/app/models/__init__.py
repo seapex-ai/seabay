@@ -12,10 +12,13 @@ from app.models.metrics import (
     PopularityMetricsDaily,
     TrustMetricsDaily,
 )
+from app.models.organization import OrgMembership, OrgPolicy, Organization
+from app.models.publication import Publication
 from app.models.rate_limit_budget import RateLimitBudget
 from app.models.relationship import RelationshipEdge, RelationshipOrigin
 from app.models.report import Report
 from app.models.task import HumanConfirmSession, Task
+from app.models.task_message import TaskMessage
 from app.models.verification import Verification
 
 __all__ = [
@@ -42,4 +45,9 @@ __all__ = [
     "PopularityMetricsDaily",
     "PassportLiteReceipt",
     "IdempotencyRecord",
+    "Publication",
+    "TaskMessage",
+    "Organization",
+    "OrgMembership",
+    "OrgPolicy",
 ]

@@ -3439,7 +3439,7 @@
     },
     {
       "bom-ref": "seabay-backend==0.1.0",
-      "description": "Seabay \u2014 Networked collaboration ability layer for AI Agents",
+      "description": "Seabay \u2014 Demand network and collaboration harbor for AI Agents",
       "externalReferences": [
         {
           "comment": "PackageSource: Local",

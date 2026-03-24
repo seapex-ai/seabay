@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install ruff
@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install dependencies
@@ -42,7 +42,7 @@ jobs:
 
   test-integration:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:15-alpine
@@ -68,7 +68,7 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install dependencies
@@ -85,7 +85,7 @@ jobs:
         env:
           SEABAY_DATABASE_URL: postgresql+asyncpg://seabay:seabay@localhost:5432/seabay_test
           SEABAY_REDIS_URL: redis://localhost:6379/0
-        run: pytest tests/ -v
+        run: pytest tests/ -v --timeout=120
 
   docker:
     runs-on: ubuntu-latest
@@ -110,7 +110,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         if: hashFiles('apps/mcp-edge/main.py') != ''
         with:
           python-version: "3.12"
@@ -127,7 +127,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         if: hashFiles('shell-cli/seabay_shell/main.py') != ''
         with:
           python-version: "3.12"
@@ -144,7 +144,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         if: hashFiles('agents/translator/agent.py') != ''
         with:
           python-version: "3.12"

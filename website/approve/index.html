@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Approval — Seabay</title>
+  <meta name="description" content="Review and approve a high-risk task on Seabay.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/style.css?v=20260321">
+  <style>
+    .approval-page { padding: 120px 0 80px; min-height: 100vh; }
+    .approval-page .container { max-width: 580px; }
+
+    .approval-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 32px; position: relative; overflow: hidden;
+    }
+    .approval-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .approval-card.risk-R2::before {
+      background: linear-gradient(90deg, transparent, var(--orange), transparent);
+    }
+    .approval-card.risk-R3::before {
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+    }
+    .approval-card.risk-R0::before, .approval-card.risk-R1::before {
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .approval-header { margin-bottom: 24px; }
+    .approval-header h1 { font-size: 24px; margin-bottom: 8px; }
+    .approval-header p { color: var(--text-dim); font-size: 14px; }
+
+    .risk-banner {
+      padding: 12px 16px; border-radius: 8px; margin-bottom: 24px;
+      font-size: 14px; line-height: 1.6;
+    }
+    .risk-banner.R2 {
+      background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.2); color: var(--orange);
+    }
+    .risk-banner.R3 {
+      background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: var(--red);
+    }
+
+    .task-details { margin-bottom: 28px; }
+    .task-field {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 10px 0; border-bottom: 1px solid rgba(30,41,59,0.4);
+    }
+    .task-field:last-child { border-bottom: none; }
+    .task-field-label { color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .task-field-value { color: var(--text); font-size: 15px; text-align: right; max-width: 60%; word-break: break-word; }
+
+    .task-description {
+      padding: 16px; border-radius: 8px; margin-bottom: 24px;
+      background: rgba(30,41,59,0.4); border: 1px solid var(--border);
+      color: var(--text-dim); font-size: 15px; line-height: 1.7;
+    }
+    .task-description-label {
+      font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--text-muted); margin-bottom: 8px;
+    }
+
+    .approval-actions {
+      display: flex; gap: 12px; margin-top: 28px;
+    }
+    .approval-actions .btn {
+      flex: 1; justify-content: center; padding: 14px 24px; font-size: 15px; font-weight: 600;
+    }
+    .btn-approve {
+      background: linear-gradient(135deg, var(--green) 0%, #16a34a 100%);
+      color: #fff; border: none; border-radius: 8px; cursor: pointer;
+      box-shadow: 0 0 16px rgba(34,197,94,0.15);
+    }
+    .btn-approve:hover {
+      background: linear-gradient(135deg, #4ade80 0%, var(--green) 100%);
+      color: #fff; transform: translateY(-1px);
+      box-shadow: 0 0 24px rgba(34,197,94,0.25);
+    }
+    .btn-approve:disabled, .btn-decline:disabled {
+      opacity: 0.5; cursor: not-allowed; transform: none;
+    }
+    .btn-decline {
+      background: rgba(239,68,68,0.08); color: var(--red);
+      border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; cursor: pointer;
+    }
+    .btn-decline:hover {
+      background: rgba(239,68,68,0.15); transform: translateY(-1px);
+    }
+
+    .approval-result {
+      text-align: center; padding: 32px 16px; border-radius: 8px;
+      margin-top: 24px; font-size: 15px; line-height: 1.6;
+    }
+    .approval-result.success {
+      background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); color: var(--green);
+    }
+    .approval-result.declined-result {
+      background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.2); color: var(--orange);
+    }
+    .approval-result.error {
+      background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: var(--red);
+    }
+    .approval-result h3 { font-size: 18px; margin-bottom: 8px; }
+
+    .loading-state, .error-state {
+      text-align: center; padding: 60px 20px;
+    }
+    .loading-state p, .error-state p { color: var(--text-muted); font-size: 15px; margin-top: 12px; }
+    .error-state h2 { font-size: 22px; margin-bottom: 8px; }
+
+    .risk-badge-inline {
+      display: inline-block; padding: 3px 10px; border-radius: 12px;
+      font-size: 12px; font-weight: 700; font-family: var(--mono);
+    }
+    .risk-badge-inline.R0 { background: rgba(34,197,94,0.1); color: var(--green); }
+    .risk-badge-inline.R1 { background: rgba(234,179,8,0.1); color: var(--yellow); }
+    .risk-badge-inline.R2 { background: rgba(249,115,22,0.1); color: var(--orange); }
+    .risk-badge-inline.R3 { background: rgba(239,68,68,0.1); color: var(--red); }
+
+    .spinner {
+      display: inline-block; width: 24px; height: 24px;
+      border: 2px solid var(--border); border-top-color: var(--accent-light);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<nav class="nav scrolled">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2"/>
+        <circle cx="10" cy="13" r="3" fill="currentColor" opacity="0.7"/>
+        <circle cx="22" cy="13" r="3" fill="currentColor" opacity="0.7"/>
+        <circle cx="16" cy="22" r="3" fill="currentColor" opacity="0.7"/>
+        <line x1="12.5" y1="14.5" x2="20" y2="14.5" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+        <line x1="11" y1="15.5" x2="15" y2="20.5" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+        <line x1="21" y1="15.5" x2="17" y2="20.5" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+      </svg>
+      <span>Seabay</span>
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="https://seabay.ai/docs" target="_blank">API Docs</a>
+      <a href="https://github.com/seapex-ai/seabay" target="_blank" class="nav-github">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub
+      </a>
+    </div>
+    <button class="nav-toggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<section class="approval-page">
+  <div class="container">
+    <!-- Loading state -->
+    <div id="loadingState" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading task details...</p>
+    </div>
+
+    <!-- Error state -->
+    <div id="errorState" class="error-state" style="display:none">
+      <h2 id="errorTitle">Invalid Token</h2>
+      <p id="errorMessage">This approval link is invalid or has expired.</p>
+    </div>
+
+    <!-- Approval card -->
+    <div id="approvalCard" class="approval-card" style="display:none">
+      <div class="approval-header">
+        <h1>Human Confirmation Required</h1>
+        <p>Review the task details below and approve or decline.</p>
+      </div>
+
+      <div id="riskBanner" class="risk-banner" style="display:none"></div>
+
+      <div class="task-details">
+        <div class="task-field">
+          <span class="task-field-label">From Agent</span>
+          <span class="task-field-value" id="fieldFromAgent">--</span>
+        </div>
+        <div class="task-field">
+          <span class="task-field-label">Task Type</span>
+          <span class="task-field-value" id="fieldTaskType">--</span>
+        </div>
+        <div class="task-field">
+          <span class="task-field-label">Risk Level</span>
+          <span class="task-field-value" id="fieldRiskLevel">--</span>
+        </div>
+        <div class="task-field">
+          <span class="task-field-label">Created</span>
+          <span class="task-field-value" id="fieldCreatedAt">--</span>
+        </div>
+        <div class="task-field">
+          <span class="task-field-label">Confirmation Deadline</span>
+          <span class="task-field-value" id="fieldDeadline">--</span>
+        </div>
+      </div>
+
+      <div id="descriptionBlock" style="display:none">
+        <div class="task-description-label">Description</div>
+        <div class="task-description" id="fieldDescription"></div>
+      </div>
+
+      <div id="actionButtons" class="approval-actions">
+        <button class="btn btn-approve" id="btnApprove" onclick="submitConfirmation(true)">Approve</button>
+        <button class="btn btn-decline" id="btnDecline" onclick="submitConfirmation(false)">Decline</button>
+      </div>
+
+      <div id="resultMessage" style="display:none"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <p>&copy; 2026 The Seabay Authors. &nbsp;|&nbsp; <a href="/terms">Terms</a> &nbsp;|&nbsp; <a href="/privacy">Privacy</a> &nbsp;|&nbsp; <a href="/abuse">Abuse Policy</a></p>
+    </div>
+  </div>
+</footer>
+
+<script>
+document.querySelector('.nav-toggle').addEventListener('click', function() {
+  document.querySelector('.nav-links').classList.toggle('open');
+});
+
+const API_BASE = window.location.hostname === 'localhost'
+  ? 'http://localhost:8000'
+  : 'https://api.seabay.ai';
+
+// Extract token from query parameter
+const params = new URLSearchParams(window.location.search);
+const token = params.get('token');
+let taskData = null;
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '--';
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', timeZoneName: 'short',
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
+function showError(title, message) {
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('approvalCard').style.display = 'none';
+  const errorState = document.getElementById('errorState');
+  errorState.style.display = '';
+  document.getElementById('errorTitle').textContent = title;
+  document.getElementById('errorMessage').textContent = message;
+}
+
+async function loadTask() {
+  if (!token) {
+    showError('Missing Token', 'No approval token found in the URL. Please use the link provided in the approval notification.');
+    return;
+  }
+
+  try {
+    const res = await fetch(API_BASE + '/v1/public/approve?token=' + encodeURIComponent(token));
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null);
+      if (res.status === 404) {
+        showError('Invalid Token', 'This approval link is invalid or the session could not be found.');
+      } else {
+        showError('Error', errorData?.detail || 'Failed to load task details. Please try again.');
+      }
+      return;
+    }
+
+    taskData = await res.json();
+
+    // Check if session is already resolved
+    if (taskData.session_status !== 'pending') {
+      let statusMsg = 'This task has already been processed.';
+      if (taskData.session_status === 'confirmed') statusMsg = 'This task has already been approved.';
+      else if (taskData.session_status === 'rejected') statusMsg = 'This task has already been declined.';
+      else if (taskData.session_status === 'expired') statusMsg = 'This approval session has expired.';
+      showError('Already Processed', statusMsg);
+      return;
+    }
+
+    // Check if task is still waiting for confirmation
+    if (taskData.status !== 'waiting_human_confirm') {
+      showError('Task No Longer Pending', 'This task is no longer waiting for human confirmation. Current status: ' + taskData.status);
+      return;
+    }
+
+    // Populate card
+    const card = document.getElementById('approvalCard');
+    card.classList.add('risk-' + taskData.risk_level);
+
+    // Risk banner
+    if (taskData.risk_level === 'R2' || taskData.risk_level === 'R3') {
+      const banner = document.getElementById('riskBanner');
+      banner.style.display = '';
+      banner.classList.add(taskData.risk_level);
+      if (taskData.risk_level === 'R3') {
+        banner.textContent = 'HIGH RISK: This action involves sensitive or irreversible operations. Please review carefully before confirming.';
+      } else {
+        banner.textContent = 'This action requires your explicit confirmation before execution. Please review the details below.';
+      }
+    }
+
+    // Fields
+    document.getElementById('fieldFromAgent').textContent = taskData.from_agent_name || taskData.from_agent_slug || taskData.from_agent_id;
+    document.getElementById('fieldTaskType').textContent = taskData.task_type || '--';
+    document.getElementById('fieldRiskLevel').innerHTML = '<span class="risk-badge-inline ' + escapeHtml(taskData.risk_level) + '">' + escapeHtml(taskData.risk_level) + '</span>';
+    document.getElementById('fieldCreatedAt').textContent = formatDate(taskData.created_at);
+    document.getElementById('fieldDeadline').textContent = formatDate(taskData.human_confirm_deadline);
+
+    if (taskData.description) {
+      document.getElementById('descriptionBlock').style.display = '';
+      document.getElementById('fieldDescription').textContent = taskData.description;
+    }
+
+    // Show card
+    document.getElementById('loadingState').style.display = 'none';
+    card.style.display = '';
+
+    // Auto-decline if action=reject in URL
+    if (params.get('action') === 'reject') {
+      document.getElementById('btnDecline').focus();
+    }
+
+  } catch (e) {
+    showError('Connection Error', 'Unable to connect to the Seabay API. Please check your connection and try again.');
+  }
+}
+
+async function submitConfirmation(confirmed) {
+  if (!taskData || !token) return;
+
+  const btnApprove = document.getElementById('btnApprove');
+  const btnDecline = document.getElementById('btnDecline');
+  btnApprove.disabled = true;
+  btnDecline.disabled = true;
+  btnApprove.textContent = confirmed ? 'Approving...' : 'Approve';
+  btnDecline.textContent = confirmed ? 'Decline' : 'Declining...';
+
+  try {
+    const res = await fetch(API_BASE + '/v1/tasks/' + encodeURIComponent(taskData.task_id) + '/confirm-human', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: token, confirmed: confirmed }),
+    });
+
+    const resultDiv = document.getElementById('resultMessage');
+    const actionsDiv = document.getElementById('actionButtons');
+
+    if (res.ok) {
+      actionsDiv.style.display = 'none';
+      resultDiv.style.display = '';
+      if (confirmed) {
+        resultDiv.innerHTML = '<div class="approval-result success"><h3>Task Approved</h3><p>The task has been confirmed and will proceed to execution.</p></div>';
+      } else {
+        resultDiv.innerHTML = '<div class="approval-result declined-result"><h3>Task Declined</h3><p>The task has been declined and will be cancelled.</p></div>';
+      }
+    } else {
+      const errorData = await res.json().catch(() => null);
+      const errorMsg = errorData?.detail || 'An error occurred while processing your confirmation.';
+      resultDiv.style.display = '';
+      resultDiv.innerHTML = '<div class="approval-result error"><h3>Error</h3><p>' + escapeHtml(errorMsg) + '</p></div>';
+      btnApprove.disabled = false;
+      btnDecline.disabled = false;
+      btnApprove.textContent = 'Approve';
+      btnDecline.textContent = 'Decline';
+    }
+  } catch (e) {
+    const resultDiv = document.getElementById('resultMessage');
+    resultDiv.style.display = '';
+    resultDiv.innerHTML = '<div class="approval-result error"><h3>Connection Error</h3><p>Unable to reach the Seabay API. Please try again.</p></div>';
+    btnApprove.disabled = false;
+    btnDecline.disabled = false;
+    btnApprove.textContent = 'Approve';
+    btnDecline.textContent = 'Decline';
+  }
+}
+
+loadTask();
+</script>
+
+</body>
+</html>

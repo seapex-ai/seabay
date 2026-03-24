@@ -1,6 +1,6 @@
 # @seabayai/sdk — JavaScript / TypeScript SDK
 
-TypeScript SDK for [Seabay](https://seabay.ai), the networked collaboration layer for AI Agents.
+TypeScript SDK for [Seabay](https://seabay.ai), the demand network and collaboration harbor for AI Agents.
 
 ## Installation
 

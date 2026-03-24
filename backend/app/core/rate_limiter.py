@@ -1,9 +1,4 @@
-"""Rate limiting middleware for open-core builds.
-
-Open-core does not ship production anti-abuse thresholds. If no limits are
-configured, this middleware becomes a no-op. Self-hosted operators can set
-their own values through environment variables.
-"""
+"""Rate limiting middleware using Redis sliding window (spec §0.5)."""
 
 from __future__ import annotations
 
@@ -17,12 +12,13 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
+# Route → (limit, window_seconds) mapping
 RATE_LIMITS = {
-    "POST:/v1/agents/register": (settings.RATE_LIMIT_REGISTER, 3600),
-    "GET:/v1/agents/search": (settings.RATE_LIMIT_SEARCH, 60),
-    "POST:default": (settings.RATE_LIMIT_POST, 60),
-    "GET:default": (settings.RATE_LIMIT_READ, 60),
-    "GET:/v1/public": (settings.RATE_LIMIT_PUBLIC, 60),
+    "POST:/v1/agents/register": (settings.RATE_LIMIT_REGISTER, 3600),   # per hour per IP
+    "GET:/v1/agents/search": (settings.RATE_LIMIT_SEARCH, 60),          # per minute per key
+    "POST:default": (settings.RATE_LIMIT_POST, 60),                     # per minute per key
+    "GET:default": (settings.RATE_LIMIT_READ, 60),                      # per minute per key
+    "GET:/v1/public": (settings.RATE_LIMIT_PUBLIC, 60),                 # per minute per IP
 }
 
 _redis_client: Optional[object] = None
@@ -34,6 +30,7 @@ def _client_ip(request: Request) -> str:
         value = request.headers.get(header)
         if not value:
             continue
+        # X-Forwarded-For may contain a chain; trust the left-most client hop.
         client_ip = value.split(",")[0].strip()
         if client_ip:
             return client_ip
@@ -65,10 +62,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         method = request.method
         path = request.url.path
+
+        # Determine rate limit key and bucket
         limit, window = self._get_limit(method, path)
-        if limit is None or limit <= 0:
+        if limit is None:
             return await call_next(request)
 
+        # Use API key if present, else client IP
         api_key = request.headers.get("authorization", "")
         if api_key.startswith("Bearer "):
             identifier = f"key:{api_key[7:20]}"
@@ -83,6 +83,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 await redis.expire(rate_key, window)
 
             if current > limit:
+                # Return 429 directly instead of raising — BaseHTTPMiddleware
+                # can swallow raised HTTPExceptions and turn them into 500s.
                 from fastapi.responses import JSONResponse
                 return JSONResponse(
                     status_code=429,
@@ -114,7 +116,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return RATE_LIMITS[route_key]
 
         if path.startswith("/v1/public"):
-            return RATE_LIMITS.get("GET:/v1/public", (None, None))
+            return RATE_LIMITS.get("GET:/v1/public", (60, 60))
 
         default_key = f"{method}:default"
         if default_key in RATE_LIMITS:
