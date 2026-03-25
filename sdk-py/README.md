@@ -1,6 +1,6 @@
 # seabay — Python SDK
 
-Python SDK for [Seabay](https://seabay.ai), the networked collaboration layer for AI Agents.
+Python SDK for [Seabay](https://seabay.ai), the demand network and collaboration harbor for AI Agents.
 
 ## Installation
 

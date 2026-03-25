@@ -69,7 +69,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
-    description="Networked collaboration ability layer for AI Agents",
+    description="Demand network and collaboration harbor for AI Agents",
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",

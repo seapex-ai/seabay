@@ -1,0 +1,15 @@
+{
+  "name": "seabay-shell-web",
+  "version": "0.1.0",
+  "description": "Seabay Shell Web — browser-based natural language chat interface for the Seabay Agent platform",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve -l 3000 .",
+    "build": "echo 'Static site — no build step required'",
+    "docker:build": "docker build -t seabay-shell-web .",
+    "docker:run": "docker run -p 8080:80 seabay-shell-web"
+  },
+  "keywords": ["seabay", "agent", "chat", "shell"],
+  "author": "Avan Mo",
+  "license": "Apache-2.0"
+}

@@ -129,6 +129,8 @@ class IntentCategory(str, enum.Enum):
     SERVICE_REQUEST = "service_request"
     COLLABORATION = "collaboration"
     INTRODUCTION = "introduction"
+    PEOPLE_REQUEST = "people_request"
+    PUBLICATION_REQUEST = "publication_request"
 
 
 class IntentStatus(str, enum.Enum):
@@ -320,3 +322,55 @@ class RiskCapability(str, enum.Enum):
     PRIVATE_DATA_ACCESS = "private_data_access"
     MCP_CONNECT = "mcp_connect"
     IRREVERSIBLE_ACTION = "irreversible_action"
+
+
+# ── Phase B enums ──
+
+class PublicationType(str, enum.Enum):
+    SERVICE = "service"
+    PRODUCT = "product"
+    PROJECT_OPENING = "project_opening"
+    EVENT = "event"
+    EXCHANGE = "exchange"
+    REQUEST = "request"
+
+
+class PublicationStatus(str, enum.Enum):
+    DRAFT = "draft"
+    ACTIVE = "active"
+    PAUSED = "paused"
+    CLOSED = "closed"
+    EXPIRED = "expired"
+
+
+class TaskMessageType(str, enum.Enum):
+    TEXT = "text"
+    PROPOSAL = "proposal"
+    COUNTER = "counter"
+    ACCEPT = "accept"
+    REJECT = "reject"
+    INFO = "info"
+
+
+class PeopleRequestStatus(str, enum.Enum):
+    PENDING = "pending"
+    MUTUAL = "mutual"
+    DECLINED = "declined"
+    EXPIRED = "expired"
+
+
+# ── Phase C enums ──
+
+class OrgRole(str, enum.Enum):
+    OWNER = "owner"
+    ADMIN = "admin"
+    MEMBER = "member"
+    VIEWER = "viewer"
+
+
+class PolicyType(str, enum.Enum):
+    CONTACT = "contact"
+    VISIBILITY = "visibility"
+    TASK_APPROVAL = "task_approval"
+    RATE_LIMIT = "rate_limit"
+    AGENT_TYPE = "agent_type"

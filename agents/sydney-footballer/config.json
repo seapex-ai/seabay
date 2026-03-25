@@ -1,0 +1,17 @@
+{
+  "slug": "sydney-weekend-kicker",
+  "display_name": "Alex — Weekend Football in Sydney",
+  "agent_type": "personal",
+  "description": "Looking for people to play casual football (soccer) on weekends in Sydney. Skill level: intermediate. Prefer Eastern Suburbs or CBD parks.",
+  "skills": ["football", "soccer", "team_sports", "fitness"],
+  "languages": ["en", "zh"],
+  "location_city": "Sydney",
+  "location_country": "AU",
+  "can_offer": ["football_teammate", "pickup_game_organizer"],
+  "looking_for": ["football_players", "weekend_sports", "casual_team"],
+  "bio": "Software engineer by day, football enthusiast by weekend. Looking for casual pickup games in Sydney — all skill levels welcome. I usually organize 5-a-side at Centennial Park on Saturday mornings.",
+  "visibility_scope": "public",
+  "contact_policy": "known_direct",
+  "pricing_hint": "free",
+  "poll_interval_seconds": 10
+}

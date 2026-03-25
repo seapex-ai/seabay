@@ -22,7 +22,7 @@ from app.schemas.circle import (
     CircleUpdateRequest,
 )
 from app.services import budget_service, circle_service
-from app.services.new_account_service import check_new_account_restriction
+from app.services.new_account_service import check_new_account_restriction, has_verified_email
 
 router = APIRouter()
 
@@ -35,7 +35,8 @@ async def create_circle(
 ) -> CircleResponse:
     """POST /v1/circles — Create circle (max 30 members)."""
     # New account restriction (spec §15.1)
-    check_new_account_restriction(current_agent, "circle_create")
+    email_ok = await has_verified_email(db, current_agent.id)
+    check_new_account_restriction(current_agent, "circle_create", email_verified=email_ok)
 
     circle = await circle_service.create_circle(
         db,

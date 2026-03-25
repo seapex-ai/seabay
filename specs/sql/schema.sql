@@ -548,3 +548,110 @@ CREATE TABLE installations (
 
 CREATE INDEX idx_installations_host ON installations (host_type);
 CREATE INDEX idx_installations_agent ON installations (linked_agent_id);
+
+-- ======================== publications ========================
+CREATE TABLE publications (
+    id                   VARCHAR(32)  PRIMARY KEY,
+    agent_id             VARCHAR(32)  NOT NULL REFERENCES agents(id),
+
+    publication_type     VARCHAR(20)  NOT NULL,
+    title                VARCHAR(200) NOT NULL,
+    description          TEXT         NOT NULL,
+    structured_data      JSONB        DEFAULT '{}',
+
+    tags                 TEXT[]       DEFAULT '{}',
+    category             VARCHAR(50),
+    price_summary        VARCHAR(128),
+    availability_summary VARCHAR(128),
+    location_city        VARCHAR(100),
+    location_country     VARCHAR(2),
+
+    status               VARCHAR(16)  NOT NULL DEFAULT 'active',
+    visibility_scope     VARCHAR(20)  NOT NULL DEFAULT 'public',
+    view_count           INTEGER      NOT NULL DEFAULT 0,
+
+    expires_at           TIMESTAMPTZ,
+    region               VARCHAR(10)  NOT NULL DEFAULT 'intl',
+    created_at           TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at           TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_publications_agent ON publications (agent_id);
+CREATE INDEX idx_publications_type ON publications (publication_type);
+CREATE INDEX idx_publications_status ON publications (status);
+CREATE INDEX idx_publications_visibility ON publications (visibility_scope);
+
+-- ======================== organizations ========================
+CREATE TABLE organizations (
+    id                     VARCHAR(32)  PRIMARY KEY,
+    slug                   VARCHAR(64)  NOT NULL UNIQUE,
+    display_name           VARCHAR(200) NOT NULL,
+    description            TEXT,
+
+    owner_agent_id         VARCHAR(32)  NOT NULL REFERENCES agents(id),
+    verification_level     VARCHAR(30)  NOT NULL DEFAULT 'none',
+    domain                 VARCHAR(200),
+
+    default_contact_policy VARCHAR(30)  NOT NULL DEFAULT 'known_direct',
+    default_visibility     VARCHAR(20)  NOT NULL DEFAULT 'network_only',
+    allowed_agent_types    TEXT[]       DEFAULT '{}',
+
+    max_members            INTEGER      DEFAULT 100,
+    status                 VARCHAR(16)  NOT NULL DEFAULT 'active',
+
+    region                 VARCHAR(10)  NOT NULL DEFAULT 'intl',
+    created_at             TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at             TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_organizations_slug ON organizations (slug);
+CREATE INDEX idx_organizations_owner ON organizations (owner_agent_id);
+
+-- ======================== org_memberships ========================
+CREATE TABLE org_memberships (
+    id         VARCHAR(32) PRIMARY KEY,
+    org_id     VARCHAR(32) NOT NULL REFERENCES organizations(id),
+    agent_id   VARCHAR(32) NOT NULL REFERENCES agents(id),
+    role       VARCHAR(20) NOT NULL DEFAULT 'member',
+
+    region     VARCHAR(10) NOT NULL DEFAULT 'intl',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    UNIQUE (org_id, agent_id)
+);
+
+CREATE INDEX idx_org_memberships_org ON org_memberships (org_id);
+CREATE INDEX idx_org_memberships_agent ON org_memberships (agent_id);
+
+-- ======================== org_policies ========================
+CREATE TABLE org_policies (
+    id           VARCHAR(32) PRIMARY KEY,
+    org_id       VARCHAR(32) NOT NULL REFERENCES organizations(id),
+
+    policy_type  VARCHAR(30) NOT NULL,
+    policy_key   VARCHAR(50) NOT NULL,
+    policy_value TEXT        NOT NULL,
+
+    region       VARCHAR(10) NOT NULL DEFAULT 'intl',
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_org_policies_org ON org_policies (org_id);
+
+-- ======================== task_messages ========================
+CREATE TABLE task_messages (
+    id             VARCHAR(32) PRIMARY KEY,
+    task_id        VARCHAR(32) NOT NULL REFERENCES tasks(id),
+    from_agent_id  VARCHAR(32) NOT NULL REFERENCES agents(id),
+
+    message_type   VARCHAR(20) NOT NULL DEFAULT 'text',
+    content        TEXT        NOT NULL,
+    structured_data JSONB,
+
+    region         VARCHAR(10) NOT NULL DEFAULT 'intl',
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_task_messages_task ON task_messages (task_id);
+CREATE INDEX idx_task_messages_from ON task_messages (from_agent_id);

@@ -1,4 +1,4 @@
-"""Task lifecycle — 8 endpoints with full state machine.
+"""Task lifecycle — endpoints with full state machine + negotiation messages.
 
 Refactored to use task_service for all business logic.
 """
@@ -6,6 +6,7 @@ Refactored to use task_service for all business logic.
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -210,3 +211,57 @@ def _task_to_response(task: Task) -> TaskResponse:
         completed_at=task.completed_at,
         cancelled_at=task.cancelled_at,
     )
+
+
+# ── Task Messages (Phase B negotiation) ──
+
+
+class _MessageBody(BaseModel):
+    content: str = Field(max_length=2000)
+    message_type: str = "text"
+    structured_data: dict | None = None
+
+
+class _MessageResponse(BaseModel):
+    id: str
+    task_id: str
+    from_agent_id: str
+    message_type: str
+    content: str
+    structured_data: dict | None
+    created_at: str
+
+    model_config = {"from_attributes": True}
+
+
+@router.post("/{task_id}/messages", status_code=201, name="send_task_message")
+async def send_task_message(
+    task_id: str,
+    body: _MessageBody,
+    current_agent: Agent = Depends(get_current_agent),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.services import task_message_service
+    msg = await task_message_service.send_message(
+        db, task_id, current_agent.id,
+        content=body.content,
+        message_type=body.message_type,
+        structured_data=body.structured_data,
+    )
+    await db.commit()
+    return _MessageResponse.model_validate(msg)
+
+
+@router.get("/{task_id}/messages", name="list_task_messages")
+async def list_task_messages(
+    task_id: str,
+    cursor: str | None = None,
+    limit: int = Query(50, ge=1, le=100),
+    current_agent: Agent = Depends(get_current_agent),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.services import task_message_service
+    messages = await task_message_service.list_messages(
+        db, task_id, current_agent.id, limit=limit, cursor=cursor,
+    )
+    return {"data": [_MessageResponse.model_validate(m) for m in messages]}

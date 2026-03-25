@@ -1,6 +1,6 @@
 apiVersion: v2
 name: seabay
-description: Seabay — Networked collaboration ability layer for AI Agents
+description: Seabay — Demand network and collaboration harbor for AI Agents
 type: application
 version: 0.1.1
 appVersion: "0.1.1"

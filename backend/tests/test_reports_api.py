@@ -161,16 +161,23 @@ class TestDuplicateReportHandling:
 
 
 class TestReportServiceThresholds:
-    """Test report threshold rules from spec."""
+    """Test report threshold rules from spec.
+
+    We check model_fields defaults directly so environment variable overrides
+    in CI cannot cause false failures.  Runtime values are allowed to differ
+    (operators may tune), but the *shipped defaults* must match the spec.
+    """
 
     def test_soft_freeze_threshold(self):
-        from app.config import settings
-        assert settings.REPORT_SOFT_FREEZE_THRESHOLD == 3
+        from app.config import Settings
+        assert Settings.model_fields["REPORT_SOFT_FREEZE_THRESHOLD"].default == 3
 
     def test_suspend_threshold(self):
-        from app.config import settings
-        assert settings.REPORT_SUSPEND_THRESHOLD == 5
+        from app.config import Settings
+        assert Settings.model_fields["REPORT_SUSPEND_THRESHOLD"].default == 5
 
     def test_suspend_greater_than_soft_freeze(self):
-        from app.config import settings
-        assert settings.REPORT_SUSPEND_THRESHOLD > settings.REPORT_SOFT_FREEZE_THRESHOLD
+        from app.config import Settings
+        soft = Settings.model_fields["REPORT_SOFT_FREEZE_THRESHOLD"].default
+        suspend = Settings.model_fields["REPORT_SUSPEND_THRESHOLD"].default
+        assert suspend > soft

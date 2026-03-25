@@ -25,6 +25,7 @@ class Intent(Base):
     trust_requirement: Mapped[Optional[str]] = mapped_column(String(20))
     match_target_type: Mapped[Optional[str]] = mapped_column(String(20))
     request_form: Mapped[Optional[Dict]] = mapped_column(JSONB)
+    audience_preference: Mapped[Optional[str]] = mapped_column(String(30))
 
     status: Mapped[str] = mapped_column(String(12), nullable=False, default="active")
     max_matches: Mapped[int] = mapped_column(Integer, nullable=False, default=5)

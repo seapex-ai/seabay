@@ -56,3 +56,10 @@ htmlcov/
 
 # Alembic
 alembic/versions/*.pyc
+
+# Agent runtime state (contains API keys)
+.agent_state.json
+*/.agent_state.json
+
+# Backups
+backups/

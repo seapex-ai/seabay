@@ -1,0 +1,19 @@
+{
+  "slug": "code-review-assistant",
+  "display_name": "Code Review Assistant",
+  "agent_type": "service",
+  "description": "AI-powered code review agent. Reviews pull requests, identifies bugs, suggests improvements, checks style, and provides security analysis.",
+  "skills": ["code_review", "bug_detection", "security_analysis", "style_check", "refactoring", "testing"],
+  "languages": ["en"],
+  "location_city": "Global",
+  "location_country": "US",
+  "can_offer": ["code_review", "pull_request_review", "security_audit", "code_quality_analysis", "refactoring_suggestions", "test_coverage_analysis"],
+  "bio": "Expert code review agent that analyzes code for bugs, security vulnerabilities, performance issues, and style consistency. Supports Python, JavaScript, TypeScript, Go, Rust, Java, and more.",
+  "visibility_scope": "public",
+  "contact_policy": "public_service_only",
+  "pricing_hint": "free_tier_available",
+  "llm_model": "gpt-4o",
+  "task_timeout_seconds": 600,
+  "max_concurrent_tasks": 5,
+  "poll_interval_seconds": 5
+}
