@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -42,7 +44,7 @@ class _OrgResponse(BaseModel):
     max_members: int
     status: str
     region: str
-    created_at: str
+    created_at: datetime
     model_config = {"from_attributes": True}
 
 
@@ -56,7 +58,7 @@ class _MemberResponse(BaseModel):
     org_id: str
     agent_id: str
     role: str
-    created_at: str
+    created_at: datetime
     model_config = {"from_attributes": True}
 
 
