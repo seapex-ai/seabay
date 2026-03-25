@@ -39,42 +39,6 @@ async def create_publication(
     return PublicationResponse.model_validate(pub)
 
 
-@router.get("/{pub_id}", name="get_publication")
-async def get_publication(
-    pub_id: str,
-    db: AsyncSession = Depends(get_db),
-):
-    pub = await publication_service.get_publication(db, pub_id)
-    return PublicationResponse.model_validate(pub)
-
-
-@router.patch("/{pub_id}", name="update_publication")
-async def update_publication(
-    pub_id: str,
-    body: PublicationUpdate,
-    current_agent: Agent = Depends(get_current_agent),
-    db: AsyncSession = Depends(get_db),
-):
-    updates = body.model_dump(exclude_unset=True)
-    if "status" in updates and updates["status"]:
-        updates["status"] = updates["status"].value
-    if "visibility_scope" in updates and updates["visibility_scope"]:
-        updates["visibility_scope"] = updates["visibility_scope"].value
-    pub = await publication_service.update_publication(db, pub_id, current_agent.id, **updates)
-    await db.commit()
-    return PublicationResponse.model_validate(pub)
-
-
-@router.delete("/{pub_id}", status_code=204, name="delete_publication")
-async def delete_publication(
-    pub_id: str,
-    current_agent: Agent = Depends(get_current_agent),
-    db: AsyncSession = Depends(get_db),
-):
-    await publication_service.delete_publication(db, pub_id, current_agent.id)
-    await db.commit()
-
-
 @router.get("", name="list_publications")
 async def list_publications(
     query: str | None = None,
@@ -116,3 +80,39 @@ async def my_publications(
         db, current_agent.id, status=status, limit=limit, cursor=cursor,
     )
     return {"data": [PublicationResponse.model_validate(p) for p in pubs]}
+
+
+@router.get("/{pub_id}", name="get_publication")
+async def get_publication(
+    pub_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    pub = await publication_service.get_publication(db, pub_id)
+    return PublicationResponse.model_validate(pub)
+
+
+@router.patch("/{pub_id}", name="update_publication")
+async def update_publication(
+    pub_id: str,
+    body: PublicationUpdate,
+    current_agent: Agent = Depends(get_current_agent),
+    db: AsyncSession = Depends(get_db),
+):
+    updates = body.model_dump(exclude_unset=True)
+    if "status" in updates and updates["status"]:
+        updates["status"] = updates["status"].value
+    if "visibility_scope" in updates and updates["visibility_scope"]:
+        updates["visibility_scope"] = updates["visibility_scope"].value
+    pub = await publication_service.update_publication(db, pub_id, current_agent.id, **updates)
+    await db.commit()
+    return PublicationResponse.model_validate(pub)
+
+
+@router.delete("/{pub_id}", status_code=204, name="delete_publication")
+async def delete_publication(
+    pub_id: str,
+    current_agent: Agent = Depends(get_current_agent),
+    db: AsyncSession = Depends(get_db),
+):
+    await publication_service.delete_publication(db, pub_id, current_agent.id)
+    await db.commit()
