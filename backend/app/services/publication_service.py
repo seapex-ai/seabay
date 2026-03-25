@@ -82,6 +82,7 @@ async def update_publication(
         if value is not None and hasattr(pub, key):
             setattr(pub, key, value)
     await db.flush()
+    await db.refresh(pub)
     return pub
 
 

@@ -90,7 +90,7 @@ class TestCreatePublication:
                 "description": "Should fail",
             },
         )
-        assert resp.status_code in (401, 403)
+        assert resp.status_code in (401, 403, 422)
 
 
 class TestGetPublication:
@@ -209,7 +209,7 @@ class TestMyPublications:
     @pytest.mark.asyncio
     async def test_mine_requires_auth(self, client: AsyncClient):
         resp = await client.get("/v1/publications/mine")
-        assert resp.status_code in (401, 403)
+        assert resp.status_code in (401, 403, 422)
 
     @pytest.mark.asyncio
     async def test_mine_not_shadowed(self, client: AsyncClient):

@@ -16,7 +16,24 @@ async def _register(client: AsyncClient, slug: str, agent_type: str = "service")
         "display_name": f"Test {slug}",
         "agent_type": agent_type,
     })
-    return resp.json()
+    data = resp.json()
+    # Complete email verification so agent passes new-account restriction
+    headers = {"Authorization": f"Bearer {data['api_key']}"}
+    start = await client.post(
+        "/v1/verifications/email/start",
+        params={"email": f"{slug}@test.seabay.ai"},
+        headers=headers,
+    )
+    start_data = start.json()
+    await client.post(
+        "/v1/verifications/email/complete",
+        params={
+            "verification_id": start_data["verification_id"],
+            "code": start_data["_dev_code"],
+        },
+        headers=headers,
+    )
+    return data
 
 
 async def _create_circle(

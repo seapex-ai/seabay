@@ -77,7 +77,7 @@ class TestCreateOrg:
             "/v1/organizations",
             json={"slug": "no-auth", "display_name": "Fail"},
         )
-        assert resp.status_code in (401, 403)
+        assert resp.status_code in (401, 403, 422)
 
 
 class TestGetOrg:

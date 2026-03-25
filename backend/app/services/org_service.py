@@ -44,6 +44,7 @@ async def create_org(
         domain=domain,
     )
     db.add(org)
+    await db.flush()  # persist org first to satisfy FK on org_memberships
 
     # Auto-add owner as member
     membership = OrgMembership(
