@@ -96,7 +96,7 @@ async def register_agent(
         api_key_prefix=extract_key_prefix(api_key),
         visibility_scope=default_visibility,
         contact_policy=default_contact,
-        status="offline",
+        status="active",
     )
     db.add(agent)
 

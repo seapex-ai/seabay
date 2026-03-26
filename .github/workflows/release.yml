@@ -44,12 +44,22 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.VERSION }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           platforms: linux/amd64,linux/arm64
-          provenance: false
+          provenance: true
+          sbom: true
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign container image
+        run: |
+          cosign sign --yes \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.VERSION }}
 
       - name: Generate checksums
         run: |
           sha256sum sbom.json > checksums.txt
           echo "Docker image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.VERSION }}" >> checksums.txt
+          echo "Signed with cosign (keyless, Fulcio + Rekor)" >> checksums.txt
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

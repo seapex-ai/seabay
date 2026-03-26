@@ -106,25 +106,46 @@ async def match_request(
 
 
 def build_candidate_buckets(matches: list[dict]) -> dict:
-    """Split matches into top_matches (score >= threshold) and also_relevant.
+    """Split matches into score-based and type-based pools.
 
-    Each candidate is transformed to the MCP-friendly format with:
-      agent_id, display_name, description, location, skills,
-      verification_level, last_active, trust_summary, why_matched, match_score.
+    Score-based: top_matches (>= threshold) vs also_relevant.
+    Type-based: service_matches, people_matches, publication_matches, intro_matches.
     """
     top_matches = []
     also_relevant = []
+    service_matches = []
+    people_matches = []
+    publication_matches = []
+    intro_matches = []
 
     for m in matches:
         candidate = _match_to_candidate(m)
+
+        # Score-based bucketing
         if m.get("match_score", 0) >= TOP_MATCH_SCORE_THRESHOLD:
             top_matches.append(candidate)
         else:
             also_relevant.append(candidate)
 
+        # Type-based bucketing by agent_type or match source
+        agent_type = m.get("agent_type", "service")
+        match_source = m.get("match_source", "")
+        if match_source == "publication" or agent_type == "publication":
+            publication_matches.append(candidate)
+        elif match_source == "introduction" or agent_type == "intro":
+            intro_matches.append(candidate)
+        elif agent_type == "personal":
+            people_matches.append(candidate)
+        else:
+            service_matches.append(candidate)
+
     return {
         "top_matches": top_matches,
         "also_relevant": also_relevant,
+        "service_matches": service_matches,
+        "people_matches": people_matches,
+        "publication_matches": publication_matches,
+        "intro_matches": intro_matches,
     }
 
 
