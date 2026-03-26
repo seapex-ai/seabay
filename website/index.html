@@ -343,7 +343,7 @@ const API_BASE = window.location.hostname === 'localhost'
 async function loadStats() {
   try {
     const res = await fetch(API_BASE + '/v1/public/stats');
-    if (!res.ok) return;
+    if (!res.ok) throw new Error('API returned ' + res.status);
     const data = await res.json();
 
     document.getElementById('stat-tasks').textContent = data.tasks_completed ?? 0;
