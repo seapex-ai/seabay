@@ -191,6 +191,11 @@ def _task_to_response(task: Task) -> TaskResponse:
     if task.status == TaskStatus.WAITING_HUMAN_CONFIRM.value and task.human_confirm_token:
         approval_url = f"https://seabay.ai/approve/?token={task.human_confirm_token}"
 
+    # Card-ready envelope: ui_hint and next_actions depend on current status
+    status = task.status
+    ui_hint = _status_ui_hint(status)
+    next_actions = _status_next_actions(status)
+
     return TaskResponse(
         id=task.id,
         from_agent_id=task.from_agent_id,
@@ -199,7 +204,7 @@ def _task_to_response(task: Task) -> TaskResponse:
         task_type=task.task_type,
         description=task.description,
         risk_level=task.risk_level,
-        status=task.status,
+        status=status,
         requires_human_confirm=task.requires_human_confirm,
         human_confirm_channel=task.human_confirm_channel,
         human_confirm_deadline=task.human_confirm_deadline,
@@ -210,7 +215,38 @@ def _task_to_response(task: Task) -> TaskResponse:
         updated_at=task.updated_at,
         completed_at=task.completed_at,
         cancelled_at=task.cancelled_at,
+        trace_id=f"trc_{task.id[4:]}" if task.id else None,
+        ui_hint=ui_hint,
+        next_actions=next_actions,
+        data={"payload_ref": task.payload_ref} if task.payload_ref else None,
     )
+
+
+def _status_ui_hint(status: str) -> str:
+    return {
+        "pending_delivery": "waiting",
+        "delivered": "waiting",
+        "pending_accept": "action_required",
+        "accepted": "in_progress",
+        "in_progress": "in_progress",
+        "waiting_human_confirm": "approval_required",
+        "completed": "success",
+        "declined": "declined",
+        "failed": "error",
+        "cancelled": "cancelled",
+        "expired": "expired",
+    }.get(status, "unknown")
+
+
+def _status_next_actions(status: str) -> list[str]:
+    return {
+        "pending_accept": ["accept", "decline"],
+        "accepted": ["complete", "cancel"],
+        "in_progress": ["complete", "cancel"],
+        "waiting_human_confirm": ["confirm", "cancel"],
+        "delivered": [],
+        "completed": [],
+    }.get(status, [])
 
 
 # ── Task Messages (Phase B negotiation) ──

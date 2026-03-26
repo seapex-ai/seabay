@@ -30,6 +30,7 @@ class MatchCandidate(BaseModel):
     trust_summary: dict = {}
     why_matched: list[str] = []
     match_score: float = 0.0
+    profile_url: str | None = None
 
 
 class CandidateBuckets(BaseModel):
@@ -54,4 +55,5 @@ class MatchResponse(BaseModel):
     summary_text: str
     fallback_url: str
     intent_id: str | None = None
+    trace_id: str | None = None
     total_matches: int = 0

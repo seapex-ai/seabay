@@ -9,6 +9,38 @@
 version: "2.0"
 boundary: "open-core"
 
+# Phase metadata for export tooling (ADR-002)
+phases:
+  phase-a:  # Core platform — stable, V1.0+
+    - backend/app/models/agent.py
+    - backend/app/models/task.py
+    - backend/app/models/intent.py
+    - backend/app/models/relationship.py
+    - backend/app/models/circle.py
+    - backend/app/models/introduction.py
+    - backend/app/models/interaction.py
+    - backend/app/models/verification.py
+    - backend/app/models/report.py
+    - backend/app/models/metrics.py
+    - backend/app/api/v1/agents.py
+    - backend/app/api/v1/tasks.py
+    - backend/app/api/v1/intents.py
+    - backend/app/api/v1/relationships.py
+    - backend/app/api/v1/circles.py
+    - backend/app/api/v1/verifications.py
+    - backend/app/api/v1/match.py
+  phase-b:  # Extensions — may evolve, V1.5+
+    - backend/app/models/publication.py
+    - backend/app/models/organization.py
+    - backend/app/models/task_message.py
+    - backend/app/api/v1/publications.py
+    - backend/app/api/v1/organizations.py
+    - backend/app/api/v1/people.py
+  deferred:  # Planned for future phases
+    - owner-dashboard
+    - agent-picker-widget
+    - dispute-audit-ui
+
 # ══════════════════════════════════════════════════════════════
 # Files/dirs included in the public repo (open-core)
 # ══════════════════════════════════════════════════════════════

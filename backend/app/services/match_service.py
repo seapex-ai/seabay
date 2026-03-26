@@ -11,6 +11,7 @@ from urllib.parse import urlencode
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.id_generator import generate_id
 from app.models.agent import Agent
 from app.services import intent_service
 
@@ -99,6 +100,7 @@ async def match_request(
         "summary_text": summary,
         "fallback_url": fallback_url,
         "intent_id": intent.id,
+        "trace_id": generate_id("trc"),
         "total_matches": len(matches),
     }
 
@@ -186,8 +188,9 @@ def _match_to_candidate(m: dict) -> dict:
             "verification_level": m.get("verification_level", "none"),
             "badges": m.get("badges", []),
         }
+    agent_id = m.get("agent_id", "")
     return {
-        "agent_id": m.get("agent_id", ""),
+        "agent_id": agent_id,
         "display_name": m.get("display_name", ""),
         "description": None,
         "location": None,
@@ -197,6 +200,7 @@ def _match_to_candidate(m: dict) -> dict:
         "trust_summary": trust,
         "why_matched": m.get("reasons", []),
         "match_score": m.get("match_score", 0.0),
+        "profile_url": f"https://seabay.ai/agents/{agent_id}" if agent_id else None,
     }
 
 

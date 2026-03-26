@@ -60,6 +60,8 @@ async def register_agent(
         slug=agent.slug,
         display_name=agent.display_name,
         agent_type=agent.agent_type,
+        status=agent.status,
+        verification_level=agent.verification_level,
         api_key=api_key,
         created_at=agent.created_at,
     )

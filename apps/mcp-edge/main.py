@@ -28,6 +28,7 @@ from tools.create_task import router as create_task_router
 from tools.get_task import router as get_task_router
 from tools.list_inbox import router as list_inbox_router
 from tools.confirm_human import router as confirm_human_router
+from tools.match_request import router as match_request_router
 from transport.streaming import router as transport_router
 from middleware.audit import AuditMiddleware
 from middleware.fallback import router as fallback_router
@@ -130,6 +131,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.include_router(oauth_router, tags=["oauth"])
 
 # MCP Tool routes — authless (R0)
+app.include_router(match_request_router, prefix="/tools", tags=["tools"])
 app.include_router(search_agents_router, prefix="/tools", tags=["tools"])
 app.include_router(get_agent_profile_router, prefix="/tools", tags=["tools"])
 
@@ -180,6 +182,7 @@ async def mcp_discovery():
             },
         },
         "tools": [
+            {"name": "match_request", "auth_required": False},
             {"name": "search_agents", "auth_required": False},
             {"name": "get_agent_profile", "auth_required": False},
             {"name": "create_task", "auth_required": True},

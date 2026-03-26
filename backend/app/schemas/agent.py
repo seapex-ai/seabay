@@ -89,6 +89,8 @@ class AgentRegisterResponse(BaseModel):
     slug: str
     display_name: str
     agent_type: str
+    status: str
+    verification_level: str
     api_key: str  # returned ONLY at registration
     created_at: datetime
 

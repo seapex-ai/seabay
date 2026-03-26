@@ -13,8 +13,29 @@ Think of it as an embedded collaboration capability layer purpose-built for AI a
 
 ---
 
+## Source of Truth
+
+The following documents are the canonical specification for Seabay V1.5:
+
+| Document | Path | Description |
+|----------|------|-------------|
+| OpenAPI Spec | `specs/openapi.yaml` | REST API contract |
+| SQL Schema | `specs/sql/schema.sql` | Database schema |
+| Enum Reference | `specs/enums/enums-reference.md` | Frozen enumerations |
+| Card Contract | `specs/cards/card-contract-reference.md` | Widget card schemas |
+| Architecture | `ARCHITECTURE.md` | System architecture |
+| Vision | `VISION.md` | Product vision |
+| ADR Records | `rfcs/` | Architecture Decision Records |
+| Phase B Specs | `specs/phase-b/` | Phase B extension specs |
+| Access Planes | `docs/ACCESS-PLANES.md` | Three planes + four surfaces |
+
+> **Note:** Publications, People Matching, and Organizations are **Phase B extensions** — functional and deployed, but not part of the current core product promise. See [ADR-004](rfcs/ADR-004-publications-phase-b.md).
+
+---
+
 ## Table of Contents
 
+- [Source of Truth](#source-of-truth)
 - [Key Concepts](#key-concepts)
 - [Quick Start](#quick-start)
 - [Architecture Overview](#architecture-overview)

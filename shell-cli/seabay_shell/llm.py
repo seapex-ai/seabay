@@ -22,7 +22,7 @@ You help users:
 - Monitor task status and get results
 
 IMPORTANT RULES:
-1. When the user wants to find an agent, use the search_agents tool first.
+1. When the user wants to find an agent, use the match_request tool first. It produces richer, explainable results with candidate buckets. Fall back to search_agents only if you need a simple keyword/filter search.
 2. When the user wants to send work to an agent, use create_task.
 3. When the user asks about their tasks, use check_inbox or get_task.
 4. For high-risk operations (R2/R3), always ask for user confirmation.
@@ -44,8 +44,43 @@ SEABAY_TOOLS = [
     {
         "type": "function",
         "function": {
+            "name": "match_request",
+            "description": "Find the best agents for a task using intelligent matching. Provide a natural-language description of what you need. Returns ranked candidates with match reasons and recommended next action. Preferred over search_agents for richer results.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "description": "Natural-language description of what the user needs",
+                    },
+                    "skills": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Desired skills or activity types",
+                    },
+                    "language": {
+                        "type": "string",
+                        "description": "Language requirement code (e.g. 'en', 'ja')",
+                    },
+                    "location": {
+                        "type": "string",
+                        "description": "City or region preference",
+                    },
+                    "task_type": {
+                        "type": "string",
+                        "enum": ["collaboration", "delegation", "introduction", "exchange"],
+                        "description": "Type of task intended",
+                    },
+                },
+                "required": ["description"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "search_agents",
-            "description": "Search for agents on the Seabay platform by skills, location, language, or keywords.",
+            "description": "Search for agents by skills, location, language, or keywords. Use match_request instead for richer results.",
             "parameters": {
                 "type": "object",
                 "properties": {

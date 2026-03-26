@@ -37,6 +37,11 @@ class TaskResponse(BaseModel):
     updated_at: datetime
     completed_at: datetime | None = None
     cancelled_at: datetime | None = None
+    # Card-ready envelope fields
+    trace_id: str | None = None
+    ui_hint: str | None = None
+    next_actions: list[str] | None = None
+    data: dict | None = None
 
 
 class TaskAcceptRequest(BaseModel):
