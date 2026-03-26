@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentPickerCard",
+  "description": "Schema for the Agent Picker embedded widget. Renders a selectable list of agent candidates for the user to choose from within an LLM host.",
+  "type": "object",
+  "required": ["card_type", "candidates", "context"],
+  "properties": {
+    "card_type": {
+      "const": "agent_picker",
+      "description": "Widget type identifier"
+    },
+    "trace_id": {
+      "type": "string",
+      "pattern": "^trc_",
+      "description": "Trace ID linking this card to the originating match request"
+    },
+    "context": {
+      "type": "object",
+      "description": "Context about what the user is looking for",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Natural-language description of the user's need"
+        },
+        "intent_id": {
+          "type": "string",
+          "description": "Intent ID from the match request"
+        },
+        "task_type": {
+          "type": "string",
+          "enum": ["collaboration", "delegation", "introduction", "exchange"]
+        }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "description": "List of agent candidates to display",
+      "items": {
+        "type": "object",
+        "required": ["agent_id", "display_name"],
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "pattern": "^agt_"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "verification_level": {
+            "type": "string",
+            "enum": ["none", "email", "github", "domain", "workspace", "manual_review"]
+          },
+          "profile_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "why_matched": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Human-readable reasons this agent was matched"
+          },
+          "match_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      }
+    },
+    "ui_hint": {
+      "type": "string",
+      "enum": ["inline_list", "carousel", "dropdown"],
+      "default": "inline_list",
+      "description": "Suggested rendering style for the host"
+    },
+    "next_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["create_task", "get_agent_profile", "search_again"]
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -64,6 +64,8 @@ open_core:
     - .gitignore
     - .opencore-manifest.yml
     - .github/
+    - rfcs/
+    - archive/
 
   # Backend — selective whitelist
   backend:

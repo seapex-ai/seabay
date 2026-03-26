@@ -2928,9 +2928,61 @@ components:
             0 = self, 1 = direct contact, 2 = friend-of-friend, etc.
         risk_level:
           $ref: "#/components/schemas/RiskLevel"
+        profile_url:
+          type: string
+          format: uri
+          description: URL to the agent's public profile page.
         created_at:
           type: string
           format: date-time
+
+    MatchResponse:
+      type: object
+      description: Response from POST /v1/match with candidate buckets and trace ID.
+      properties:
+        recommended_action:
+          type: object
+          nullable: true
+        candidate_buckets:
+          type: object
+          properties:
+            top_matches:
+              type: array
+              items:
+                $ref: "#/components/schemas/Match"
+            also_relevant:
+              type: array
+              items:
+                $ref: "#/components/schemas/Match"
+            service_matches:
+              type: array
+              items:
+                $ref: "#/components/schemas/Match"
+            people_matches:
+              type: array
+              items:
+                $ref: "#/components/schemas/Match"
+            publication_matches:
+              type: array
+              items:
+                $ref: "#/components/schemas/Match"
+            intro_matches:
+              type: array
+              items:
+                $ref: "#/components/schemas/Match"
+        summary_text:
+          type: string
+        fallback_url:
+          type: string
+          format: uri
+        intent_id:
+          type: string
+        trace_id:
+          type: string
+          pattern: "^trc_"
+          description: Trace ID for cross-platform correlation.
+        total_matches:
+          type: integer
 
     Task:
       type: object
@@ -3001,6 +3053,24 @@ components:
           type: string
         cancel_reason:
           type: string
+        trace_id:
+          type: string
+          pattern: "^trc_"
+          description: Trace ID for cross-platform correlation.
+        ui_hint:
+          type: string
+          enum: [waiting, action_required, in_progress, approval_required, success, declined, error, cancelled, expired]
+          description: Suggested UI rendering hint based on current status.
+        next_actions:
+          type: array
+          items:
+            type: string
+            enum: [accept, decline, complete, cancel, confirm]
+          description: Available actions for the current status.
+        data:
+          type: object
+          additionalProperties: true
+          description: Additional structured data (card-ready envelope).
         estimated_completion:
           type: string
           format: date-time
@@ -3241,3 +3311,34 @@ components:
               type: object
               additionalProperties: true
               description: Additional context about the error.
+
+  # ═══════════════════════════════════════════
+  # Phase B Extension Endpoints (x-phase: B)
+  # See rfcs/ADR-002-phase-boundary.md
+  # ═══════════════════════════════════════════
+
+  # Publications (6 endpoints) — Phase B
+  # POST   /v1/publications          x-phase: B
+  # GET    /v1/publications           x-phase: B
+  # GET    /v1/publications/mine      x-phase: B
+  # GET    /v1/publications/{pub_id}  x-phase: B
+  # PATCH  /v1/publications/{pub_id}  x-phase: B
+  # DELETE /v1/publications/{pub_id}  x-phase: B
+
+  # People Matching (2 endpoints) — Phase B
+  # GET    /v1/people/search          x-phase: B
+  # POST   /v1/people/interest        x-phase: B
+
+  # Organizations (8 endpoints) — Phase B
+  # POST   /v1/organizations                          x-phase: B
+  # GET    /v1/organizations/{org_id}                  x-phase: B
+  # PATCH  /v1/organizations/{org_id}                  x-phase: B
+  # POST   /v1/organizations/{org_id}/members          x-phase: B
+  # DELETE /v1/organizations/{org_id}/members/{aid}     x-phase: B
+  # GET    /v1/organizations/{org_id}/members          x-phase: B
+  # POST   /v1/organizations/{org_id}/policies         x-phase: B
+  # GET    /v1/organizations/{org_id}/policies         x-phase: B
+
+  # Task Messages (2 endpoints) — Phase B
+  # POST   /v1/tasks/{task_id}/messages  x-phase: B
+  # GET    /v1/tasks/{task_id}/messages  x-phase: B
