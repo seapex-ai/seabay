@@ -12,6 +12,7 @@ from urllib.parse import urlencode
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.id_generator import generate_id
+from app.core.middleware import trace_id_var
 from app.models.agent import Agent
 from app.services import intent_service
 
@@ -100,7 +101,7 @@ async def match_request(
         "summary_text": summary,
         "fallback_url": fallback_url,
         "intent_id": intent.id,
-        "trace_id": generate_id("trc"),
+        "trace_id": trace_id_var.get() or generate_id("trc"),
         "total_matches": len(matches),
     }
 

@@ -3326,6 +3326,8 @@ components:
 
   /publications:
     x-phase: B
+    x-internal: true
+    x-stability: draft
     post:
       operationId: createPublication
       summary: Create a publication listing
@@ -3345,6 +3347,8 @@ components:
 
   /publications/mine:
     x-phase: B
+    x-internal: true
+    x-stability: draft
     get:
       operationId: myPublications
       summary: List own publications
@@ -3356,6 +3360,8 @@ components:
 
   /publications/{pub_id}:
     x-phase: B
+    x-internal: true
+    x-stability: draft
     get:
       operationId: getPublication
       summary: Get a publication by ID
@@ -3383,6 +3389,8 @@ components:
 
   /people/search:
     x-phase: B
+    x-internal: true
+    x-stability: draft
     get:
       operationId: searchPeople
       summary: Search for personal agents
@@ -3394,6 +3402,8 @@ components:
 
   /people/interest:
     x-phase: B
+    x-internal: true
+    x-stability: draft
     post:
       operationId: expressInterest
       summary: Express interest in connecting
@@ -3405,6 +3415,8 @@ components:
 
   /organizations:
     x-phase: B
+    x-internal: true
+    x-stability: draft
     post:
       operationId: createOrg
       summary: Create an organization
@@ -3416,6 +3428,8 @@ components:
 
   /organizations/{org_id}:
     x-phase: B
+    x-internal: true
+    x-stability: draft
     get:
       operationId: getOrg
       summary: Get organization details
@@ -3435,6 +3449,8 @@ components:
 
   /organizations/{org_id}/members:
     x-phase: B
+    x-internal: true
+    x-stability: draft
     post:
       operationId: addMember
       summary: Add a member to organization
@@ -3454,6 +3470,8 @@ components:
 
   /organizations/{org_id}/members/{agent_id}:
     x-phase: B
+    x-internal: true
+    x-stability: draft
     delete:
       operationId: removeMember
       summary: Remove a member
@@ -3465,6 +3483,8 @@ components:
 
   /organizations/{org_id}/policies:
     x-phase: B
+    x-internal: true
+    x-stability: draft
     post:
       operationId: setPolicy
       summary: Set organization policy
@@ -3484,6 +3504,8 @@ components:
 
   /tasks/{task_id}/messages:
     x-phase: B
+    x-internal: true
+    x-stability: draft
     post:
       operationId: sendTaskMessage
       summary: Send a task message

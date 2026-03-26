@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_agent
 from app.core.exceptions import NotFoundError
+from app.core.middleware import trace_id_var
 from app.database import get_db
 from app.models.agent import Agent
 from app.models.enums import TaskStatus
@@ -215,7 +216,7 @@ def _task_to_response(task: Task) -> TaskResponse:
         updated_at=task.updated_at,
         completed_at=task.completed_at,
         cancelled_at=task.cancelled_at,
-        trace_id=f"trc_{task.id[4:]}" if task.id else None,
+        trace_id=trace_id_var.get() or f"trc_{task.id[4:]}",
         ui_hint=ui_hint,
         next_actions=next_actions,
         data={"payload_ref": task.payload_ref} if task.payload_ref else None,
