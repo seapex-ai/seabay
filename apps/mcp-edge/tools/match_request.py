@@ -105,14 +105,19 @@ async def match_request(
     if req.task_type:
         body["task_type"] = req.task_type
 
+    # Propagate trace_id from upstream or generate one
+    trace_id = request.headers.get("x-trace-id") or f"trc_{req.description[:8]}"
+
     core_client = request.app.state.core_client
     try:
         response = await core_client.post("/match", json=body)
         response.raise_for_status()
         core_data = response.json()
+        # Prefer trace_id from Core API response (middleware-generated)
+        trace_id = core_data.get("trace_id") or response.headers.get("x-trace-id") or trace_id
     except Exception as e:
         logger.error("Core API match failed: %s", e)
-        return _empty_response(req.description)
+        return _empty_response(req.description, trace_id)
 
     buckets = core_data.get("candidate_buckets", {})
     top = buckets.get("top_matches", [])
@@ -120,7 +125,7 @@ async def match_request(
     all_matches = top + also
 
     if not all_matches:
-        return _empty_response(req.description)
+        return _empty_response(req.description, trace_id)
 
     best = top[0] if top else all_matches[0]
 
@@ -150,10 +155,10 @@ async def match_request_schema():
     return TOOL_SCHEMA
 
 
-def _empty_response(description: str) -> dict:
+def _empty_response(description: str, trace_id: str | None = None) -> dict:
     return {
         "summary_text": f"No matching agents found for: {description[:100]}",
-        "trace_id": None,
+        "trace_id": trace_id,
         "data": {"candidate_buckets": {"top_matches": [], "also_relevant": []}, "total_matches": 0},
         "suggested_action": None,
         "fallback_message": (

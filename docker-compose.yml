@@ -85,6 +85,33 @@ services:
     restart: unless-stopped
     profiles: ["full"]
 
+  # ── Monitoring (optional, activate with: docker compose --profile monitoring up) ──
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    volumes:
+      - ./scripts/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./scripts/alerts.yml:/etc/prometheus/alerts.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    profiles: ["monitoring"]
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: seabay
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    profiles: ["monitoring"]
+
 volumes:
   postgres_data:
   redis_data:
+  prometheus_data:
+  grafana_data:
