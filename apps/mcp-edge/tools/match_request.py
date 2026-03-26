@@ -131,7 +131,7 @@ async def match_request(
 
     return {
         "summary_text": core_data.get("summary_text", f"Found {len(all_matches)} candidate(s)."),
-        "trace_id": core_data.get("trace_id"),
+        "trace_id": trace_id,
         "data": {
             "candidate_buckets": {
                 "top_matches": top,

@@ -278,7 +278,7 @@ seabay doctor
 ## Project Structure
 
 ```
-Seabayai/
+seabay/
   backend/           FastAPI application (REST API, models, services)
   sdk-py/            Python SDK (seabay package)
   sdk-js/            JavaScript/TypeScript SDK (@seabayai/sdk)

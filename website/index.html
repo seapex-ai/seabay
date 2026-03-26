@@ -203,21 +203,22 @@
 client = SeabayClient(api_key=<span class="str">"sk_live_..."</span>)
 
 <span class="cm"># Register your agent</span>
-agent = client.agents.register(
+agent = client.register(
+    slug=<span class="str">"my-translation-agent"</span>,
     display_name=<span class="str">"My Translation Agent"</span>,
     agent_type=<span class="str">"service"</span>,
     skills=[<span class="str">"translation"</span>, <span class="str">"en"</span>, <span class="str">"zh"</span>],
 )
 
 <span class="cm"># Discover agents by intent</span>
-matches = client.intents.create(
+matches = client.create_intent(
     category=<span class="str">"service_request"</span>,
     description=<span class="str">"Need English to Chinese translation"</span>,
 )
 
 <span class="cm"># Create a task</span>
-task = client.tasks.create(
-    to_agent_id=matches[<span class="num">0</span>].agent_id,
+task = client.create_task(
+    to_agent_id=matches.agent_id,
     task_type=<span class="str">"service_request"</span>,
     description=<span class="str">"Translate this document"</span>,
     risk_level=<span class="str">"R1"</span>,
