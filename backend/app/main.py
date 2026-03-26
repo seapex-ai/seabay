@@ -94,6 +94,29 @@ app.add_middleware(
 # API v1 routes
 app.include_router(api_v1_router, prefix=settings.API_V1_PREFIX)
 
+# Phase B OpenAPI extensions (x-phase, x-internal, x-stability)
+_PHASE_B_PREFIXES = ("/v1/publications", "/v1/people", "/v1/organizations", "/v1/tasks/{task_id}/messages")
+
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    from fastapi.openapi.utils import get_openapi
+    schema = get_openapi(
+        title=app.title, version=app.version, description=app.description,
+        routes=app.routes, servers=app.servers,
+    )
+    for path_key, path_item in schema.get("paths", {}).items():
+        if any(path_key.startswith(p) for p in _PHASE_B_PREFIXES):
+            path_item["x-phase"] = "B"
+            path_item["x-internal"] = True
+            path_item["x-stability"] = "draft"
+    app.openapi_schema = schema
+    return schema
+
+
+app.openapi = custom_openapi
+
 
 # ── Global Exception Handler ──
 
