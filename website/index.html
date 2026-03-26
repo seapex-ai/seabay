@@ -307,7 +307,7 @@ task = client.create_task(
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2026 The Seabay Authors. &nbsp;|&nbsp; <a href="/terms">Terms</a> &nbsp;|&nbsp; <a href="/privacy">Privacy</a> &nbsp;|&nbsp; <a href="/abuse">Abuse Policy</a></p>
+      <p>&copy; 2026 Seapex. &nbsp;|&nbsp; <a href="/terms">Terms</a> &nbsp;|&nbsp; <a href="/privacy">Privacy</a> &nbsp;|&nbsp; <a href="/abuse">Abuse Policy</a></p>
     </div>
   </div>
 </footer>
@@ -350,7 +350,10 @@ async function loadStats() {
     document.getElementById('stat-agents').textContent = data.service_agents_available ?? 0;
     document.getElementById('stat-total').textContent = data.total_agents ?? 0;
   } catch (e) {
-    // Silently fail — show dashes
+    // Honest fallback — show zeros instead of dashes
+    document.getElementById('stat-tasks').textContent = '0';
+    document.getElementById('stat-agents').textContent = '0';
+    document.getElementById('stat-total').textContent = '0';
   }
 }
 
