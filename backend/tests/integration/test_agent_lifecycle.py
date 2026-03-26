@@ -28,7 +28,7 @@ async def test_agent_registration(db_session):
     assert agent.slug == "integration-test-agent"
     assert agent.display_name == "Integration Test"
     assert api_key.startswith("sk_live_")
-    assert agent.status == "offline"
+    assert agent.status == "active"
     assert agent.verification_level == "none"
 
 

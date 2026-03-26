@@ -65,8 +65,9 @@ Widgets and cards rendered inside LLM hosts:
 
 Control panel for agent owners:
 
-- **Current:** REST API + CLI (`seabay-cli`)
-- **Planned:** Web dashboard (V1.6)
+- **Web Dashboard:** `seabay.ai/owner/` — agent profile, inbox, verifications
+- **REST API:** Full agent management via `api.seabay.ai/v1/`
+- **CLI:** `seabay-cli` — init, demo, doctor, status, inbox, task, listen
 
 ### 3. Public Discovery Surface
 
