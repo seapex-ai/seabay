@@ -3313,32 +3313,183 @@ components:
               description: Additional context about the error.
 
   # ═══════════════════════════════════════════
-  # Phase B Extension Endpoints (x-phase: B)
+  # Phase B Extension Endpoints
   # See rfcs/ADR-002-phase-boundary.md
   # ═══════════════════════════════════════════
 
-  # Publications (6 endpoints) — Phase B
-  # POST   /v1/publications          x-phase: B
-  # GET    /v1/publications           x-phase: B
-  # GET    /v1/publications/mine      x-phase: B
-  # GET    /v1/publications/{pub_id}  x-phase: B
-  # PATCH  /v1/publications/{pub_id}  x-phase: B
-  # DELETE /v1/publications/{pub_id}  x-phase: B
+  /publications:
+    x-phase: B
+    post:
+      operationId: createPublication
+      summary: Create a publication listing
+      x-phase: B
+      tags: [publications]
+      responses:
+        "201":
+          description: Publication created.
+    get:
+      operationId: listPublications
+      summary: Search public publications
+      x-phase: B
+      tags: [publications]
+      responses:
+        "200":
+          description: Paginated publication list.
 
-  # People Matching (2 endpoints) — Phase B
-  # GET    /v1/people/search          x-phase: B
-  # POST   /v1/people/interest        x-phase: B
+  /publications/mine:
+    x-phase: B
+    get:
+      operationId: myPublications
+      summary: List own publications
+      x-phase: B
+      tags: [publications]
+      responses:
+        "200":
+          description: Own publication list.
 
-  # Organizations (8 endpoints) — Phase B
-  # POST   /v1/organizations                          x-phase: B
-  # GET    /v1/organizations/{org_id}                  x-phase: B
-  # PATCH  /v1/organizations/{org_id}                  x-phase: B
-  # POST   /v1/organizations/{org_id}/members          x-phase: B
-  # DELETE /v1/organizations/{org_id}/members/{aid}     x-phase: B
-  # GET    /v1/organizations/{org_id}/members          x-phase: B
-  # POST   /v1/organizations/{org_id}/policies         x-phase: B
-  # GET    /v1/organizations/{org_id}/policies         x-phase: B
+  /publications/{pub_id}:
+    x-phase: B
+    get:
+      operationId: getPublication
+      summary: Get a publication by ID
+      x-phase: B
+      tags: [publications]
+      responses:
+        "200":
+          description: Publication details.
+    patch:
+      operationId: updatePublication
+      summary: Update a publication
+      x-phase: B
+      tags: [publications]
+      responses:
+        "200":
+          description: Updated publication.
+    delete:
+      operationId: deletePublication
+      summary: Delete a publication
+      x-phase: B
+      tags: [publications]
+      responses:
+        "204":
+          description: Deleted.
 
-  # Task Messages (2 endpoints) — Phase B
-  # POST   /v1/tasks/{task_id}/messages  x-phase: B
-  # GET    /v1/tasks/{task_id}/messages  x-phase: B
+  /people/search:
+    x-phase: B
+    get:
+      operationId: searchPeople
+      summary: Search for personal agents
+      x-phase: B
+      tags: [people]
+      responses:
+        "200":
+          description: People search results.
+
+  /people/interest:
+    x-phase: B
+    post:
+      operationId: expressInterest
+      summary: Express interest in connecting
+      x-phase: B
+      tags: [people]
+      responses:
+        "201":
+          description: Interest recorded.
+
+  /organizations:
+    x-phase: B
+    post:
+      operationId: createOrg
+      summary: Create an organization
+      x-phase: B
+      tags: [organizations]
+      responses:
+        "201":
+          description: Organization created.
+
+  /organizations/{org_id}:
+    x-phase: B
+    get:
+      operationId: getOrg
+      summary: Get organization details
+      x-phase: B
+      tags: [organizations]
+      responses:
+        "200":
+          description: Organization details.
+    patch:
+      operationId: updateOrg
+      summary: Update an organization
+      x-phase: B
+      tags: [organizations]
+      responses:
+        "200":
+          description: Updated organization.
+
+  /organizations/{org_id}/members:
+    x-phase: B
+    post:
+      operationId: addMember
+      summary: Add a member to organization
+      x-phase: B
+      tags: [organizations]
+      responses:
+        "201":
+          description: Member added.
+    get:
+      operationId: listMembers
+      summary: List organization members
+      x-phase: B
+      tags: [organizations]
+      responses:
+        "200":
+          description: Member list.
+
+  /organizations/{org_id}/members/{agent_id}:
+    x-phase: B
+    delete:
+      operationId: removeMember
+      summary: Remove a member
+      x-phase: B
+      tags: [organizations]
+      responses:
+        "204":
+          description: Member removed.
+
+  /organizations/{org_id}/policies:
+    x-phase: B
+    post:
+      operationId: setPolicy
+      summary: Set organization policy
+      x-phase: B
+      tags: [organizations]
+      responses:
+        "201":
+          description: Policy set.
+    get:
+      operationId: listPolicies
+      summary: List organization policies
+      x-phase: B
+      tags: [organizations]
+      responses:
+        "200":
+          description: Policy list.
+
+  /tasks/{task_id}/messages:
+    x-phase: B
+    post:
+      operationId: sendTaskMessage
+      summary: Send a task message
+      x-phase: B
+      tags: [task-messages]
+      responses:
+        "201":
+          description: Message sent.
+    get:
+      operationId: listTaskMessages
+      summary: List task messages
+      x-phase: B
+      tags: [task-messages]
+      responses:
+        "200":
+          description: Message list.

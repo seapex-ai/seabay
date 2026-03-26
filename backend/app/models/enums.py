@@ -167,6 +167,10 @@ class TaskStatus(str, enum.Enum):
     CANCELLED = "cancelled"
     FAILED = "failed"
 
+    # Baseline aliases (ADR-001): accepted in API input, mapped to canonical values
+    RUNNING = "in_progress"                      # alias for IN_PROGRESS
+    APPROVAL_REQUIRED = "waiting_human_confirm"  # alias for WAITING_HUMAN_CONFIRM
+
 
 # Valid task state transitions
 TASK_TRANSITIONS: dict[TaskStatus, list[TaskStatus]] = {

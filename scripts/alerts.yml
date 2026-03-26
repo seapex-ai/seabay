@@ -1,0 +1,66 @@
+# Seabay Prometheus alerting rules
+
+groups:
+  - name: seabay-availability
+    rules:
+      - alert: APIDown
+        expr: up{job="seabay-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Seabay API is down"
+          description: "API health check has been failing for 2 minutes."
+
+      - alert: MCPEdgeDown
+        expr: up{job="seabay-mcp-edge"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MCP Edge is down"
+          description: "MCP Edge health check has been failing for 2 minutes."
+
+  - name: seabay-resources
+    rules:
+      - alert: DiskSpaceWarning
+        expr: node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} < 0.15
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk space below 15%"
+
+      - alert: DiskSpaceCritical
+        expr: node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} < 0.05
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk space below 5%"
+
+      - alert: HighMemoryUsage
+        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Available memory below 10%"
+
+  - name: seabay-database
+    rules:
+      - alert: PostgresDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL is unreachable"
+
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis is unreachable"
