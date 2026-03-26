@@ -2453,7 +2453,14 @@ components:
         - expired
         - cancelled
         - failed
-      description: Current status of a task in its lifecycle (12-state machine).
+      description: |
+        Current status of a task in its lifecycle (12-state machine).
+
+        Baseline aliases (accepted in API input, see ADR-001):
+        - `running` → canonical: `in_progress`
+        - `approval_required` → canonical: `waiting_human_confirm`
+
+        The `ui_hint` field in TaskResponse maps these to display values.
 
     RiskLevel:
       type: string
