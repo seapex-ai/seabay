@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Seabay Status</title>
+<link rel="icon" type="image/svg+xml" href="https://seabay.ai/favicon.svg">
+<meta http-equiv="refresh" content="60">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0e1a;color:#e2e8f0;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.card{max-width:520px;width:100%;padding:48px 40px;background:#111827;border-radius:16px;border:1px solid #1e293b}
+h1{font-size:28px;margin-bottom:6px;text-align:center}
+.sub{color:#94a3b8;font-size:15px;margin-bottom:36px;text-align:center}
+.check{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #1e293b;font-size:15px}
+.check:last-child{border-bottom:none}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;background:#22c55e}
+.dot.down{background:#ef4444}
+.dot.checking{background:#eab308;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.label{flex:1;font-weight:500}
+.val{color:#94a3b8;font-size:13px}
+.foot{color:#64748b;font-size:13px;text-align:center;margin-top:28px}
+.foot a{color:#60a5fa;text-decoration:none}
+.foot a:hover{text-decoration:underline}
+.banner{text-align:center;padding:10px 16px;border-radius:8px;margin-bottom:28px;font-size:14px;font-weight:500}
+.banner.ok{background:rgba(34,197,94,0.1);color:#22c55e;border:1px solid rgba(34,197,94,0.2)}
+.banner.bad{background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2)}
+.banner.warn{background:rgba(234,179,8,0.1);color:#eab308;border:1px solid rgba(234,179,8,0.2)}
+.refresh{color:#64748b;font-size:12px;text-align:center;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Seabay Status</h1>
+<p class="sub">Real-time system health</p>
+<div class="banner ok" id="banner">System Status</div>
+<div id="checks">
+<div class="check"><span class="dot checking" id="dot-api"></span><span class="label">API Server</span><span class="val" id="val-api">Verifying...</span></div>
+<div class="check"><span class="dot checking" id="dot-db"></span><span class="label">PostgreSQL</span><span class="val" id="val-db">Verifying...</span></div>
+<div class="check"><span class="dot checking" id="dot-redis"></span><span class="label">Redis Cache</span><span class="val" id="val-redis">Verifying...</span></div>
+<div class="check"><span class="dot checking" id="dot-web"></span><span class="label">Website</span><span class="val" id="val-web">Verifying...</span></div>
+</div>
+<p class="foot">Last checked: <span id="ts"></span><br><a href="https://seabay.ai">seabay.ai</a> &nbsp;|&nbsp; &copy; 2026 Seapex</p>
+<p class="refresh">Auto-refreshes every 60 seconds</p>
+</div>
+<script>
+(function(){
+  var issues = 0;
+  function setStatus(id, ok, text) {
+    document.getElementById("dot-"+id).className = "dot" + (ok ? "" : " down");
+    document.getElementById("val-"+id).textContent = text;
+    if (!ok) issues++;
+  }
+  function updateBanner() {
+    var b = document.getElementById("banner");
+    if (issues === 0) { b.className = "banner ok"; b.textContent = "All systems operational"; }
+    else if (issues <= 1) { b.className = "banner warn"; b.textContent = "Partial degradation detected"; }
+    else { b.className = "banner bad"; b.textContent = "Multiple systems degraded"; }
+  }
+  fetch("/api/health-detail").then(function(r){return r.json()}).then(function(d){
+    var c = d.components || {};
+    setStatus("api", c.api && c.api.status==="ok", c.api ? "v"+c.api.version+" \u2014 "+c.api.status : "Unknown");
+    setStatus("db", c.database && c.database.status==="ok", c.database ? (c.database.status==="ok"?"Operational":"Down") : "Unknown");
+    setStatus("redis", c.redis && c.redis.status==="ok", c.redis ? (c.redis.status==="ok"?"Operational":"Down") : "Unknown");
+  }).catch(function(){
+    setStatus("api", false, "Unreachable");
+    setStatus("db", false, "Unknown");
+    setStatus("redis", false, "Unknown");
+  }).finally(function(){
+    fetch("https://seabay.ai/",{mode:"no-cors"}).then(function(){
+      setStatus("web", true, "Operational");
+    }).catch(function(){
+      setStatus("web", false, "Unreachable");
+    }).finally(updateBanner);
+  });
+  document.getElementById("ts").textContent = new Date().toISOString().replace("T"," ").slice(0,19) + " UTC";
+})();
+</script>
+</body>
+</html>
