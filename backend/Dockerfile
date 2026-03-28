@@ -1,5 +1,9 @@
 FROM python:3.12-slim AS builder
 
+LABEL org.opencontainers.image.source=https://github.com/seapex-ai/seabay
+LABEL org.opencontainers.image.description="Seabay API — demand network and collaboration harbor for AI Agents"
+LABEL org.opencontainers.image.licenses=Apache-2.0
+
 WORKDIR /app
 
 # Install system dependencies
